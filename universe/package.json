@@ -1,0 +1,16 @@
+
+{
+  "packagingVersion": "4.0",
+  "upgradesFrom": ["{{upgrades-from}}"],
+  "downgradesTo": ["{{downgrades-to}}"],
+  "minDcosReleaseVersion": "1.9",
+  "name": "hivemq",
+  "version": "{{package-version}}",
+  "maintainer": "support@YOURNAMEHERE.COM",
+  "description": "HiveMQ on DC/OS",
+  "selected": false,
+  "framework": true,
+  "tags": ["0.55.2", "hivemq"],
+  "postInstallNotes": "DC/OS HiveMQ is being installed!\n\n\tDocumentation: {{documentation-path}}\n\tIssues: {{issues-path}}",
+  "postUninstallNotes": "DC/OS HiveMQ is being uninstalled."
+}

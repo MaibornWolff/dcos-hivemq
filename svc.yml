@@ -1,0 +1,80 @@
+name: {{FRAMEWORK_NAME}}
+scheduler:
+  principal: {{FRAMEWORK_PRINCIPAL}}
+  user: {{FRAMEWORK_USER}}
+pods:
+  master:
+    count: 2
+    placement: '{{{NODE_PLACEMENT}}}'
+    {{#ENABLE_VIRTUAL_NETWORK}}
+    networks:
+      {{VIRTUAL_NETWORK_NAME}}:
+        labels: {{VIRTUAL_NETWORK_PLUGIN_LABELS}}
+    {{/ENABLE_VIRTUAL_NETWORK}}
+    uris:
+      - {{HIVEMQ_URI}}
+      - {{JAVA_URI}}
+      - {{BOOTSTRAP_URI}}
+    tasks:
+      node:
+        ports:
+          tcp-discovery:
+            port: {{TASKCFG_ALL_DISCOVERY_PORT}}
+            env-key: DISCOVERY_PORT
+        goal: RUNNING
+        cpus: {{NODE_CPUS}}
+        memory: {{NODE_MEM}}
+        cmd: |
+          ./bootstrap -resolve-hosts=master-0-node.$FRAMEWORK_HOST,master-1-node.$FRAMEWORK_HOST
+          sed -i -e "s/1\.1\.1\.1/$(getent hosts master-0-node.$FRAMEWORK_HOST | awk '{ print $1 }')/g" $MESOS_SANDBOX/hivemq-4.0.2/conf/config.xml
+          sed -i -e "s/2\.2\.2\.2/$(getent hosts master-1-node.$FRAMEWORK_HOST | awk '{ print $1 }')/g" $MESOS_SANDBOX/hivemq-4.0.2/conf/config.xml
+          if [ ! -z "$LICENSE_FILE" ]; then
+            echo "$LICENSE_FILE" | base64 -d > $MESOS_SANDBOX/hivemq-4.0.2/license/hivemq.lic
+          fi
+          chmod 755 $MESOS_SANDBOX/hivemq-4.0.2/bin/run.sh
+          JAVA_HOME=$MESOS_SANDBOX/jdk-11.0.2 PATH=$MESOS_SANDBOX/jdk-11.0.2/bin/:$PATH $MESOS_SANDBOX/hivemq-4.0.2/bin/run.sh
+        configs:
+          config.xml:
+            template: config.xml.mustache
+            dest: hivemq-4.0.2/conf/config.xml
+  slave:
+    count: {{NODE_COUNT}}
+    placement: '{{{NODE_PLACEMENT}}}'
+    {{#ENABLE_VIRTUAL_NETWORK}}
+    networks:
+      {{VIRTUAL_NETWORK_NAME}}:
+        labels: {{VIRTUAL_NETWORK_PLUGIN_LABELS}}
+    {{/ENABLE_VIRTUAL_NETWORK}}
+    uris:
+      - {{HIVEMQ_URI}}
+      - {{JAVA_URI}}
+      - {{BOOTSTRAP_URI}}
+    tasks:
+      node:
+        goal: RUNNING
+        cpus: {{NODE_CPUS}}
+        memory: {{NODE_MEM}}
+        cmd: |
+          ./bootstrap -resolve-hosts=master-0-node.$FRAMEWORK_HOST,master-1-node.$FRAMEWORK_HOST
+          sed -i -e "s/1\.1\.1\.1/$(getent hosts master-0-node.$FRAMEWORK_HOST | awk '{ print $1 }')/g" $MESOS_SANDBOX/hivemq-4.0.2/conf/config.xml
+          sed -i -e "s/2\.2\.2\.2/$(getent hosts master-1-node.$FRAMEWORK_HOST | awk '{ print $1 }')/g" $MESOS_SANDBOX/hivemq-4.0.2/conf/config.xml
+          if [ ! -z "$LICENSE_FILE" ]; then
+            echo "$LICENSE_FILE" | base64 -d > $MESOS_SANDBOX/hivemq-4.0.2/license/hivemq.lic
+          fi
+
+          chmod 755 $MESOS_SANDBOX/hivemq-4.0.2/bin/run.sh
+          JAVA_HOME=$MESOS_SANDBOX/jdk-11.0.2 PATH=$MESOS_SANDBOX/jdk-11.0.2/bin/:$PATH $MESOS_SANDBOX/hivemq-4.0.2/bin/run.sh
+        configs:
+          config.xml:
+            template: config.xml.mustache
+            dest: hivemq-4.0.2/conf/config.xml
+plans:
+  deploy:
+    strategy: serial
+    phases:
+      master-parallel-phase:
+        strategy: parallel
+        pod: master
+      slave-parallel-phase:
+        strategy: serial
+        pod: slave

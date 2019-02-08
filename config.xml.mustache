@@ -1,0 +1,175 @@
+<?xml version="1.0"?>
+<hivemq>
+
+    <listeners>
+        <tcp-listener>
+            <port>1883</port>
+            <bind-address>0.0.0.0</bind-address>
+        </tcp-listener>
+        {{#ENABLE_WEBSOCKET_LISTENER}}
+        <websocket-listener>
+            <port>8000</port>
+            <bind-address>0.0.0.0</bind-address>
+            <path>/mqtt</path>
+            <subprotocols>
+                <subprotocol>mqttv3.1</subprotocol>
+                <subprotocol>mqtt</subprotocol>
+            </subprotocols>
+            <allow-extensions>true</allow-extensions>
+        </websocket-listener>
+        {{/ENABLE_WEBSOCKET_LISTENER}}
+        {{#ENABLE_TLS_LISTENER}}
+        <tls-tcp-listener>
+            <port>8883</port>
+            <bind-address>0.0.0.0</bind-address>
+            <tls>
+                <keystore>
+                    <path>{{MESOS_SANDBOX}}/keystore.jks</path>
+                    <password>password-keystore</password>
+                    <private-key-password>password-key</private-key-password>
+                </keystore>
+                <truststore>
+                    <path>{{MESOS_SANDBOX}}/truststore.jks</path>
+                    <password>password-keystore</password>
+                </truststore>
+                <client-authentication-mode>NONE</client-authentication-mode>
+            </tls>
+        </tls-tcp-listener>
+        {{/ENABLE_TLS_LISTENER}}
+        {{#ENABLE_TLS_WEBSOCKET_LISTENER}}
+        <tls-websocket-listener>
+            <port>8001</port>
+            <bind-address>0.0.0.0</bind-address>
+            <path>/mqtt</path>
+            <allow-extensions>false</allow-extensions>
+            <subprotocols>
+                <subprotocol>mqttv3.1</subprotocol>
+                <subprotocol>mqtt</subprotocol>
+            </subprotocols>
+            <tls>
+                <keystore>
+                    <path>{{MESOS_SANDBOX}}/keystore.jks</path>
+                    <password>password-keystore</password>
+                    <private-key-password>password-key</private-key-password>
+                </keystore>
+                <truststore>
+                    <path>{{MESOS_SANDBOX}}/truststore.jks</path>
+                    <password>password-truststore</password>
+                </truststore>
+                <client-authentication-mode>NONE</client-authentication-mode>
+            </tls>
+        </tls-websocket-listener>
+        {{/ENABLE_TLS_WEBSOCKET_LISTENER}}
+    </listeners>
+
+    <cluster>
+        <!-- Enable clustering -->
+        <enabled>{{ENABLE_CLUSTER}}</enabled>
+        <transport>
+            <tcp>
+                <bind-address>{{MESOS_CONTAINER_IP}}</bind-address>
+                <bind-port>{{DISCOVERY_PORT}}</bind-port>
+            </tcp>
+        </transport>
+        <discovery>
+            <static>
+                <node>
+                    <!-- replace this IP with the IP address of your interface -->
+                    <host>{{MESOS_CONTAINER_IP}}</host>
+                    <port>{{DISCOVERY_PORT}}</port>
+                </node>
+                <node>
+                    <!-- this IP will be replaced by the IP of the primary master during startup -->
+                    <host>1.1.1.1</host>
+                    <port>{{DISCOVERY_PORT}}</port>
+                </node>
+                <node>
+                    <!-- his IP will be replaced by the IP of the secondary master during startup -->
+                    <host>2.2.2.2</host>
+                    <port>{{DISCOVERY_PORT}}</port>
+                </node>
+            </static>
+        </discovery>
+    </cluster>
+
+    <mqtt>
+        <queued-messages>
+            <max-queue-size>1000</max-queue-size>
+            <strategy>discard</strategy> <!-- alternative: discard-oldest -->
+        </queued-messages>
+        <topic-alias>
+            <enabled>true</enabled>
+            <max-per-client>5</max-per-client>
+        </topic-alias>
+        <message-expiry>
+            <max-interval>4294967296</max-interval>  <!-- this value means no message expiry -->
+        </message-expiry>
+        <session-expiry>
+            <max-interval>4294967295</max-interval> <!-- ~ 130 years -->
+        </session-expiry>
+        <keep-alive>
+            <allow-unlimited>true</allow-unlimited>
+            <max-keep-alive>65535</max-keep-alive>
+        </keep-alive>
+        <packets>
+            <max-packet-size>268435460</max-packet-size> <!-- 256 MB -->
+        </packets>
+        <receive-maximum>
+            <server-receive-maximum>10</server-receive-maximum>
+        </receive-maximum>
+        <quality-of-service>
+            <max-qos>2</max-qos>
+        </quality-of-service>
+        <wildcard-subscriptions>
+            <enabled>{{ALLOW_WILDCARD_SUBSCRIPTIONS}}</enabled>
+        </wildcard-subscriptions>
+        <shared-subscriptions>
+            <enabled>{{ALLOW_SHARED_SUBSCRIPTIONS}}</enabled>
+        </shared-subscriptions>
+        <subscription-identifier>
+            <enabled>true</enabled>
+        </subscription-identifier>
+        <retained-messages>
+            <enabled>true</enabled>
+        </retained-messages>
+    </mqtt>
+
+    <control-center>
+        <enabled>{{ENABLE_CONTROL_CENTER}}</enabled>
+        <listeners>
+            <http>
+                <port>8080</port>
+                <bind-address>0.0.0.0</bind-address>
+            </http>
+            {{#ENABLE_TLS_LISTENER}}
+            <https>
+                <port>8443</port>
+                <bind-address>0.0.0.0</bind-address>
+                <tls>
+                    <keystore>
+                        <path>{{MESOS_SANDBOX}}/keystore.jks</path>
+                        <password>changeme</password>
+                        <private-key-password>changeme</private-key-password>
+                    </keystore>
+                </tls>
+            </https>
+            {{/ENABLE_TLS_LISTENER}}
+        </listeners>
+    </control-center>
+
+    <restrictions>
+        <!-- Maximum simultaneous connections (-1 = unlimited) -->
+        <max-connections>-1</max-connections>
+
+        <!-- Maximum length of client identifier -->
+        <max-client-id-length>65535</max-client-id-length>
+
+        <!-- Incoming limit in bytes/second (0 = unlimited) -->
+        <incoming-bandwidth-throttling>0</incoming-bandwidth-throttling>
+    </restrictions>
+
+    <anonymous-usage-statistics>
+        <enabled>{{ENABLE_USAGE_STATISTICS}}</enabled>
+    </anonymous-usage-statistics>
+
+</hivemq>

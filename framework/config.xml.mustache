@@ -80,12 +80,12 @@
                 </node>
                 <node>
                     <!-- this IP will be replaced by the IP of the primary master during startup -->
-                    <host>1.1.1.1</host>
+                    <host>${MASTER_0_IP}</host>
                     <port>{{DISCOVERY_PORT}}</port>
                 </node>
                 <node>
-                    <!-- his IP will be replaced by the IP of the secondary master during startup -->
-                    <host>2.2.2.2</host>
+                    <!-- this IP will be replaced by the IP of the secondary master during startup -->
+                    <host>${MASTER_1_IP}</host>
                     <port>{{DISCOVERY_PORT}}</port>
                 </node>
             </static>

@@ -50,12 +50,13 @@ pods:
         memory: {{NODE_MEM}}
         cmd: |
           ./bootstrap -resolve-hosts=master-0-node.$FRAMEWORK_HOST,master-1-node.$FRAMEWORK_HOST
-          sed -i -e "s/1\.1\.1\.1/$(getent hosts master-0-node.$FRAMEWORK_HOST | awk '{ print $1 }')/g" $MESOS_SANDBOX/hivemq-4.0.2/conf/config.xml
-          sed -i -e "s/2\.2\.2\.2/$(getent hosts master-1-node.$FRAMEWORK_HOST | awk '{ print $1 }')/g" $MESOS_SANDBOX/hivemq-4.0.2/conf/config.xml
+          export MASTER_0_IP=$(getent hosts master-0-node.$FRAMEWORK_HOST | awk '{ print $1 }')
+          export MASTER_1_IP=$(getent hosts master-1-node.$FRAMEWORK_HOST | awk '{ print $1 }')
+          export HIVEMQ_DATA_FOLDER=$MESOS_SANDBOX/hivemq-data
+          sed -i -e '41d' $MESOS_SANDBOX/hivemq-4.0.2/bin/run.sh
           if [ ! -z "$LICENSE_FILE" ]; then
             echo "$LICENSE_FILE" | base64 -d > $MESOS_SANDBOX/hivemq-4.0.2/license/hivemq.lic
           fi
-          ls -l
 
           chmod 755 $MESOS_SANDBOX/hivemq-4.0.2/bin/run.sh
           JAVA_HOME=$MESOS_SANDBOX/jdk-11.0.2 PATH=$MESOS_SANDBOX/jdk-11.0.2/bin/:$PATH $MESOS_SANDBOX/hivemq-4.0.2/bin/run.sh
@@ -63,6 +64,24 @@ pods:
           config.xml:
             template: config.xml.mustache
             dest: hivemq-4.0.2/conf/config.xml
+        volume:
+          path: "hivemq-data"
+          type: {{NODE_DISK_TYPE}}
+          size: {{NODE_DISK}}
+        readiness-check:
+          cmd: |
+            pgrep -f hivemq\.jar
+          interval: 10
+          delay: 10
+          timeout: 5
+        health-check:
+          cmd: |
+            pgrep -f hivemq\.jar
+          interval: 10
+          grace-period: 20
+          delay: 20
+          timeout: 5
+          max-consecutive-failures: 10
   slave:
     count: {{NODE_COUNT}}
     placement: '{{{NODE_PLACEMENT}}}'
@@ -102,8 +121,10 @@ pods:
           {{/TASKCFG_ALL_ENABLE_WEBSOCKET_LISTENER}}
         cmd: |
           ./bootstrap -resolve-hosts=master-0-node.$FRAMEWORK_HOST,master-1-node.$FRAMEWORK_HOST
-          sed -i -e "s/1\.1\.1\.1/$(getent hosts master-0-node.$FRAMEWORK_HOST | awk '{ print $1 }')/g" $MESOS_SANDBOX/hivemq-4.0.2/conf/config.xml
-          sed -i -e "s/2\.2\.2\.2/$(getent hosts master-1-node.$FRAMEWORK_HOST | awk '{ print $1 }')/g" $MESOS_SANDBOX/hivemq-4.0.2/conf/config.xml
+          export MASTER_0_IP=$(getent hosts master-0-node.$FRAMEWORK_HOST | awk '{ print $1 }')
+          export MASTER_1_IP=$(getent hosts master-1-node.$FRAMEWORK_HOST | awk '{ print $1 }')
+          export HIVEMQ_DATA_FOLDER=$MESOS_SANDBOX/hivemq-data
+          sed -i -e '41d' $MESOS_SANDBOX/hivemq-4.0.2/bin/run.sh
           if [ ! -z "$LICENSE_FILE" ]; then
             echo "$LICENSE_FILE" | base64 -d > $MESOS_SANDBOX/hivemq-4.0.2/license/hivemq.lic
           fi
@@ -114,6 +135,24 @@ pods:
           config.xml:
             template: config.xml.mustache
             dest: hivemq-4.0.2/conf/config.xml
+        volume:
+          path: "hivemq-data"
+          type: {{NODE_DISK_TYPE}}
+          size: {{NODE_DISK}}
+        readiness-check:
+          cmd: |
+            pgrep -f hivemq\.jar
+          interval: 10
+          delay: 10
+          timeout: 5
+        health-check:
+          cmd: |
+            pgrep -f hivemq\.jar
+          interval: 10
+          grace-period: 20
+          delay: 20
+          timeout: 5
+          max-consecutive-failures: 10
 plans:
   deploy:
     strategy: serial

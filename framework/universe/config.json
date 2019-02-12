@@ -87,21 +87,38 @@
         },
         "cpus": {
           "title": "CPU count",
-          "description": "hivemq pod CPU requirements",
+          "description": "HiveMQ pod CPU requirements",
           "type": "number",
           "default": 1
         },
         "mem": {
           "title": "Memory size (MB)",
-          "description": "hivemq pod mem requirements (in MB)",
+          "description": "HiveMQ pod mem requirements (in MB)",
           "type": "integer",
           "default": 1024
+        },
+        "disk": {
+          "title": "Disk size (MB)",
+          "description": "HiveMQ pod persistent disk requirements (in MB)",
+          "type": "integer",
+          "default": 50
+        },
+        "disk_type": {
+          "title": "Disk type [ROOT, MOUNT]",
+          "description": "Mount volumes require preconfiguration in DC/OS",
+          "enum": [
+            "ROOT",
+            "MOUNT"
+          ],
+          "default": "ROOT"
         }
       },
       "required": [
         "slave_count",
         "cpus",
-        "mem"
+        "mem",
+        "disk",
+        "disk_type"
       ]
 	},
     "hivemq": {

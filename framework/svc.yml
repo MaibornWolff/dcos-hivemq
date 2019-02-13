@@ -84,6 +84,7 @@ pods:
           max-consecutive-failures: 10
   slave:
     count: {{NODE_COUNT}}
+    allow-decommission: true
     placement: '{{{NODE_PLACEMENT}}}'
     {{#ENABLE_VIRTUAL_NETWORK}}
     networks:

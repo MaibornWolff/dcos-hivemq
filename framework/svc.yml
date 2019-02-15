@@ -82,7 +82,7 @@ pods:
           delay: 20
           timeout: 5
           max-consecutive-failures: 10
-      wait_for_cluster_health:
+      decommission_task:
         goal: ONCE
         cpus: 0.1
         memory: 128
@@ -164,7 +164,7 @@ pods:
           delay: 20
           timeout: 5
           max-consecutive-failures: 10
-      wait_for_cluster_health:
+      decommission_task:
         goal: ONCE
         cpus: 0.1
         memory: 128

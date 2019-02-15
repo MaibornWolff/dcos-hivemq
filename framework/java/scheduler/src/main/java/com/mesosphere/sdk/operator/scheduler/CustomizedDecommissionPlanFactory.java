@@ -66,6 +66,7 @@ public class CustomizedDecommissionPlanFactory {
      */
     public static final GoalStateOverride.Status DECOMMISSIONING_STATUS =
             GoalStateOverride.DECOMMISSIONED.newStatus(GoalStateOverride.Progress.IN_PROGRESS);
+    public static String DECOMMISSION_TASK_NAME = "decommission_task";
 
     private final PlanInfo planInfo;
 
@@ -100,7 +101,7 @@ public class CustomizedDecommissionPlanFactory {
             tasksToDecommission.addAll(
                     podTasks
                             .stream()
-                            .filter(x -> ! x.getName().contains("wait_for_cluster_health")) // we don't want to decommission the decommissionStep
+                            .filter(x -> ! x.getName().contains(DECOMMISSION_TASK_NAME)) // we don't want to decommission the decommissionStep
                             .map(Protos.TaskInfo::getName)
                             .collect(Collectors.toSet())
             );
@@ -153,9 +154,9 @@ public class CustomizedDecommissionPlanFactory {
                 }
             }
 
-            // 1.5 Start a task to wait until the cluster is healthy again
+            // 1.5 Start a task to wait until the cluster is healthy again - we could also do this before killing to set the node into maintenance mode
             DefaultStepFactory factory = new DefaultStepFactory(store, stateStore, namespace);
-            steps.add(factory.getStep(new DefaultPodInstance(thisPodSpec, entry.getKey().podIndex), Collections.singletonList("wait_for_cluster_health")));
+            steps.add(factory.getStep(new DefaultPodInstance(thisPodSpec, entry.getKey().podIndex), Collections.singletonList(DECOMMISSION_TASK_NAME)));
 
             // 2. Unreserve pod's resources
             // Note: Even though this step is in a serial phase, in practice resource cleanup should be done in

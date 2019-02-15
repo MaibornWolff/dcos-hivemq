@@ -82,6 +82,16 @@ pods:
           delay: 20
           timeout: 5
           max-consecutive-failures: 10
+      wait_for_cluster_health:
+        goal: ONCE
+        cpus: 0.1
+        memory: 128
+        cmd: |
+          for i in {1..15}
+          do
+             echo "Counting to $i";
+             sleep 1;
+          done
   slave:
     count: {{NODE_COUNT}}
     allow-decommission: true
@@ -154,6 +164,16 @@ pods:
           delay: 20
           timeout: 5
           max-consecutive-failures: 10
+      wait_for_cluster_health:
+        goal: ONCE
+        cpus: 0.1
+        memory: 128
+        cmd: |
+          for i in {1..15}
+          do
+             echo "Counting to $i";
+             sleep 1;
+          done
 plans:
   deploy:
     strategy: serial
@@ -161,6 +181,10 @@ plans:
       master-parallel-phase:
         strategy: parallel
         pod: master
-      slave-parallel-phase:
+        steps:
+          - default: [[node]]
+      slave-serial-phase:
         strategy: serial
         pod: slave
+        steps:
+          - default: [[node]]

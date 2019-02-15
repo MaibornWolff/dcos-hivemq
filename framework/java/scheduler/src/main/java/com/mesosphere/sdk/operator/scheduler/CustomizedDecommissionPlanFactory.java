@@ -100,7 +100,7 @@ public class CustomizedDecommissionPlanFactory {
             tasksToDecommission.addAll(
                     podTasks
                             .stream()
-                            .filter(x -> ! x.getName().contains("wait_for_cluster_health")) // changed here
+                            .filter(x -> ! x.getName().contains("wait_for_cluster_health")) // we don't want to decommission the decommissionStep
                             .map(Protos.TaskInfo::getName)
                             .collect(Collectors.toSet())
             );
@@ -137,8 +137,13 @@ public class CustomizedDecommissionPlanFactory {
         for (Map.Entry<PodKey, Collection<Protos.TaskInfo>> entry : podsToDecommission.entrySet()) { // there are multiple instances of each pod
             List<Step> steps = new ArrayList<>();
 
+            // 1. Kill pod's tasks
+            steps.addAll(entry.getValue().stream() // this loops over "node" and other tasks that could be running
+                    .map(task -> new TriggerDecommissionStep(stateStore, task, namespace))
+                    .collect(Collectors.toList()));
 
-            List<PodSpec> podSpecs = serviceSpec.getPods();
+            // 1.2 Get the podSpec required to create a new DeploymentStep
+            List<PodSpec> podSpecs = serviceSpec.getPods(); // I would prefer to get the required podSpec in an easier way - this is horrible
             PodSpec thisPodSpec = null;
             BasicConfigTargetStore store = new BasicConfigTargetStore();
             for (PodSpec podSpec : podSpecs) {
@@ -148,18 +153,9 @@ public class CustomizedDecommissionPlanFactory {
                 }
             }
 
+            // 1.5 Start a task to wait until the cluster is healthy again
             DefaultStepFactory factory = new DefaultStepFactory(store, stateStore, namespace);
-
-            // 1. Kill pod's tasks, but check for cluster health in between
-            for (Protos.TaskInfo task: entry.getValue()) {
-                steps.add(new TriggerDecommissionStep(stateStore, task, namespace));
-                steps.add(factory.getStep(new DefaultPodInstance(thisPodSpec, entry.getKey().podIndex), Collections.singletonList("wait_for_cluster_health")));
-            }
-
-            // 1. Kill pod's tasks, but check for cluster health in between
-//            steps.addAll(entry.getValue().stream() // in this step, every instance of a task is killed
-//                    .map(task -> new TriggerDecommissionStep(stateStore, task, namespace))
-//                    .collect(Collectors.toList()));
+            steps.add(factory.getStep(new DefaultPodInstance(thisPodSpec, entry.getKey().podIndex), Collections.singletonList("wait_for_cluster_health")));
 
             // 2. Unreserve pod's resources
             // Note: Even though this step is in a serial phase, in practice resource cleanup should be done in

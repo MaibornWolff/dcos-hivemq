@@ -84,7 +84,7 @@ pods:
           timeout: 5
           max-consecutive-failures: 10
       decommission_task:
-        goal: ONCE
+        goal: FINISH
         cpus: 0.1
         memory: 128
         cmd: |
@@ -195,7 +195,7 @@ pods:
           timeout: 5
           max-consecutive-failures: 10
       decommission_task:
-        goal: ONCE
+        goal: FINISH
         cpus: 0.1
         memory: 128
         cmd: |
@@ -253,9 +253,9 @@ plans:
         strategy: serial
         pod: master
         steps:
-          - default: [[node]]
+          - default: [[decommission_task], [node]]
       slave-serial-phase:
         strategy: serial
         pod: slave
         steps:
-          - default: [[node]]
+          - default: [[decommission_task], [node]]

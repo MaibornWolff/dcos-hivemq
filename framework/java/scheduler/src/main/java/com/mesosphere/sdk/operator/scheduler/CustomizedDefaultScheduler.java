@@ -27,7 +27,6 @@ import com.mesosphere.sdk.offer.history.OfferOutcomeTracker;
 import com.mesosphere.sdk.scheduler.AbstractScheduler;
 import com.mesosphere.sdk.scheduler.OfferResources;
 import com.mesosphere.sdk.scheduler.SchedulerConfig;
-import com.mesosphere.sdk.scheduler.decommission.DecommissionPlanFactory;
 import com.mesosphere.sdk.scheduler.plan.DecommissionPlanManager;
 import com.mesosphere.sdk.scheduler.plan.Plan;
 import com.mesosphere.sdk.scheduler.plan.PlanCoordinator;

@@ -139,15 +139,10 @@ public class CustomizedDecommissionPlanFactory {
             List<Step> steps = new ArrayList<>();
 
             // 0.2 Get the podSpec required to create a new DeploymentStep
-            List<PodSpec> podSpecs = serviceSpec.getPods(); // I would prefer to get the required podSpec in an easier way - this is horrible
-            PodSpec thisPodSpec = null;
+            PodSpec thisPodSpec = serviceSpec.getPods().stream()
+                    .filter(podSpec -> podSpec.getType().equals(entry.getKey().getPodType()))
+                    .findAny().get();
             BasicConfigTargetStore store = new BasicConfigTargetStore();
-            for (PodSpec podSpec : podSpecs) {
-                if (podSpec.getType().equals(entry.getKey().getPodType())) {
-                    thisPodSpec = podSpec;
-                    break;
-                }
-            }
 
             // 0.5 Start a task to put node into maintenance mode and wait for everything to be ready before killing the node
             DefaultStepFactory factory = new DefaultStepFactory(store, stateStore, namespace);

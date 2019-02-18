@@ -37,7 +37,6 @@ finish and the node be killed.
 
 ### Update Pod Resources
 
-When updating the resources of running pods, they will be recreated one after the other, but there will be no
-node draining or check for cluster health before killing a node. The next node will only be created once
-the previous one is restarted and healthy - so there is a health check performed in between, just not before killing
-the first node that is to be updated.
+When updating the resources of running pods, they will be recreated one after the other. Before replacing a node, the
+cluster needs to be healthy and the node will be put in maintenance mode. Only when all clients have disconnected and
+the cluster is still healthy, will the node be replaced.

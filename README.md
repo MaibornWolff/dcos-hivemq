@@ -27,3 +27,17 @@ dcos security org groups add_user superusers hivemq-principal
 ```
 Then you can use `hivemq-principal` as service account and `hivemq/account-secret` as service account secret in the
 package configuration and enable HiveMQ's TLS support.
+
+### Decommission Task
+
+The decommission task will run before a HiveMQ node should be stopped when updating the configuration to a lower number
+of nodes. Right now, it will first check for the cluster to be healthy and then put the node to be decommissioned
+in maintenance mode. Only if the node has no connected clients any more and the cluster is still healthy, will this task
+finish and the node be killed. 
+
+### Update Pod Resources
+
+When updating the resources of running pods, they will be recreated one after the other, but there will be no
+node draining or check for cluster health before killing a node. The next node will only be created once
+the previous one is restarted and healthy - so there is a health check performed in between, just not before killing
+the first node that is to be updated.

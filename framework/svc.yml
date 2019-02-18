@@ -246,3 +246,16 @@ plans:
         pod: slave
         steps:
           - default: [[node]]
+  update:
+    strategy: serial
+    phases:
+      master-parallel-phase:
+        strategy: serial
+        pod: master
+        steps:
+          - default: [[node]]
+      slave-serial-phase:
+        strategy: serial
+        pod: slave
+        steps:
+          - default: [[node]]

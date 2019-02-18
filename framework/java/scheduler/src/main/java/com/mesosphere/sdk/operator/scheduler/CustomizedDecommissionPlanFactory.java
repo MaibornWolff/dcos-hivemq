@@ -138,12 +138,7 @@ public class CustomizedDecommissionPlanFactory {
         for (Map.Entry<PodKey, Collection<Protos.TaskInfo>> entry : podsToDecommission.entrySet()) { // there are multiple instances of each pod
             List<Step> steps = new ArrayList<>();
 
-            // 1. Kill pod's tasks
-            steps.addAll(entry.getValue().stream() // this loops over "node" and other tasks that could be running
-                    .map(task -> new TriggerDecommissionStep(stateStore, task, namespace))
-                    .collect(Collectors.toList()));
-
-            // 1.2 Get the podSpec required to create a new DeploymentStep
+            // 0.2 Get the podSpec required to create a new DeploymentStep
             List<PodSpec> podSpecs = serviceSpec.getPods(); // I would prefer to get the required podSpec in an easier way - this is horrible
             PodSpec thisPodSpec = null;
             BasicConfigTargetStore store = new BasicConfigTargetStore();
@@ -154,9 +149,14 @@ public class CustomizedDecommissionPlanFactory {
                 }
             }
 
-            // 1.5 Start a task to wait until the cluster is healthy again - we could also do this before killing to set the node into maintenance mode
+            // 0.5 Start a task to put node into maintenance mode and wait for everything to be ready before killing the node
             DefaultStepFactory factory = new DefaultStepFactory(store, stateStore, namespace);
             steps.add(factory.getStep(new DefaultPodInstance(thisPodSpec, entry.getKey().podIndex), Collections.singletonList(DECOMMISSION_TASK_NAME)));
+
+            // 1. Kill pod's tasks
+            steps.addAll(entry.getValue().stream() // this loops over "node" and other tasks that could be running
+                    .map(task -> new TriggerDecommissionStep(stateStore, task, namespace))
+                    .collect(Collectors.toList()));
 
             // 2. Unreserve pod's resources
             // Note: Even though this step is in a serial phase, in practice resource cleanup should be done in

@@ -15,6 +15,7 @@ pods:
       - {{HIVEMQ_URI}}
       - {{JAVA_URI}}
       - {{BOOTSTRAP_URI}}
+      - {{JQ_URI}}
     tasks:
       node:
         {{#TASKCFG_ALL_ENABLE_TLS_LISTENER}}
@@ -87,11 +88,39 @@ pods:
         cpus: 0.1
         memory: 128
         cmd: |
-          for i in {1..15}
-          do
-             echo "Counting to $i";
-             sleep 1;
-          done
+          mv ./jq-linux64 ./jq && chmod +x ./jq
+          export NODE=$(echo $TASK_NAME | sed 's/decommission_task/node/')
+          # the following lines can be enabled once HiveMQ actually opens the endpoint
+
+  #            # Wait until cluster is healthy before putting node into maintenance mode
+  #            while true
+  #            do
+  #             export STATUS=$(curl http://$NODE.$FRAMEWORK_HOST:1234/health)
+  #             echo ${STATUS} | ./jq
+  #             if $(echo "$STATUS" | ./jq -e '.overall == "HEALTHY"') ; then
+  #                echo "Cluster is healthy"
+  #                break
+  #             else
+  #                echo "Cluster is NOT healthy"
+  #                sleep 5
+  #             fi
+  #            done
+  #            # put node into maintenance mode
+  #            curl -H "Content-Type: application/json" -d '{"state": "maintenance","disconnectInterval": "40s","disconnectBatch": "30"}' http://$NODE.$FRAMEWORK_HOST:1234/state
+  #            # Wait until all clients are disconnected and the cluster is healthy
+  #            while true
+  #            do
+  #             export STATUS=$(curl http://$NODE.$FRAMEWORK_HOST:1234/health)
+  #             echo ${STATUS} | ./jq
+  #             export THIS_NODE=$(echo "$STATUS" | ./jq .currentNode)
+  #             if $(echo "$STATUS" | ./jq -e '.overall == "HEALTHY"') &&  $(echo "$STATUS" | ./jq -e ".nodes.$THIS_NODE.connectedClients == 0") ; then
+  #                echo "Cluster is healthy and all clients disconnected"
+  #                break
+  #             else
+  #                echo "Cluster not healthy or clients still connected"
+  #                sleep 5
+  #             fi
+  #            done
   slave:
     count: {{NODE_COUNT}}
     allow-decommission: true
@@ -105,6 +134,7 @@ pods:
       - {{HIVEMQ_URI}}
       - {{JAVA_URI}}
       - {{BOOTSTRAP_URI}}
+      - {{JQ_URI}}
     tasks:
       node:
         {{#TASKCFG_ALL_ENABLE_TLS_LISTENER}}
@@ -169,11 +199,39 @@ pods:
         cpus: 0.1
         memory: 128
         cmd: |
-          for i in {1..15}
-          do
-             echo "Counting to $i";
-             sleep 1;
-          done
+            mv ./jq-linux64 ./jq && chmod +x ./jq
+            export NODE=$(echo $TASK_NAME | sed 's/decommission_task/node/')
+# the following lines can be enabled once HiveMQ actually opens the endpoint
+
+#            # Wait until cluster is healthy before putting node into maintenance mode
+#            while true
+#            do
+#             export STATUS=$(curl http://$NODE.$FRAMEWORK_HOST:1234/health)
+#             echo ${STATUS} | ./jq
+#             if $(echo "$STATUS" | ./jq -e '.overall == "HEALTHY"') ; then
+#                echo "Cluster is healthy"
+#                break
+#             else
+#                echo "Cluster is NOT healthy"
+#                sleep 5
+#             fi
+#            done
+#            # put node into maintenance mode
+#            curl -H "Content-Type: application/json" -d '{"state": "maintenance","disconnectInterval": "40s","disconnectBatch": "30"}' http://$NODE.$FRAMEWORK_HOST:1234/state
+#            # Wait until all clients are disconnected and the cluster is healthy
+#            while true
+#            do
+#             export STATUS=$(curl http://$NODE.$FRAMEWORK_HOST:1234/health)
+#             echo ${STATUS} | ./jq
+#             export THIS_NODE=$(echo "$STATUS" | ./jq .currentNode)
+#             if $(echo "$STATUS" | ./jq -e '.overall == "HEALTHY"') &&  $(echo "$STATUS" | ./jq -e ".nodes.$THIS_NODE.connectedClients == 0") ; then
+#                echo "Cluster is healthy and all clients disconnected"
+#                break
+#             else
+#                echo "Cluster not healthy or clients still connected"
+#                sleep 5
+#             fi
+#            done
 plans:
   deploy:
     strategy: serial

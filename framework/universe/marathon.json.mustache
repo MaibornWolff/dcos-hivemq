@@ -50,6 +50,8 @@
     "BOOTSTRAP_URI": "{{resource.assets.uris.bootstrap-zip}}",
     "HIVEMQ_URI": "{{resource.assets.uris.hivemq-zip}}",
     "JQ_URI": "{{resource.assets.uris.jq}}",
+    "RBAC_URI": "{{resource.assets.uris.rbac-plugin}}",
+
     {{#service.service_account_secret}}
     "DCOS_SERVICE_ACCOUNT_CREDENTIAL": { "secret": "serviceCredential" },
     "MESOS_MODULES": "{\"libraries\":[{\"file\":\"libmesos-bundle\/lib\/mesos\/libdcos_security.so\",\"modules\":[{\"name\": \"com_mesosphere_dcos_ClassicRPCAuthenticatee\"},{\"name\":\"com_mesosphere_dcos_http_Authenticatee\",\"parameters\":[{\"key\":\"jwt_exp_timeout\",\"value\":\"5mins\"},{\"key\":\"preemptive_refresh_duration\",\"value\":\"30mins\"}]}]}]}",
@@ -58,6 +60,7 @@
     {{/service.service_account_secret}}
     "LIBMESOS_URI": "{{resource.assets.uris.libmesos-bundle-tar-gz}}",
 
+    "TASKCFG_ALL_ENABLE_USERS": "{{hivemq.enable_user_management}}",
     "TASKCFG_ALL_ENABLE_CLUSTER": "{{hivemq.enable_cluster}}",
     "TASKCFG_ALL_ENABLE_WEBSOCKET_LISTENER": "{{hivemq.enable_websocket_listener}}",
     "TASKCFG_ALL_WEBSOCKET_PORT": "{{hivemq.websocket_port}}",

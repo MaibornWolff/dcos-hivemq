@@ -40,3 +40,12 @@ finish and the node be killed.
 When updating the resources of running pods, they will be recreated one after the other. Before replacing a node, the
 cluster needs to be healthy and the node will be put in maintenance mode. Only when all clients have disconnected and
 the cluster is still healthy, will the node be replaced.
+
+### Add users
+
+If you enable the user management, you can add users during runtime with this command:
+```
+dcos hivemq plan start add_user -p USER=Alwin -p PASSWORD=test -p ROLE=superuser
+```
+
+Users will not persist during pod restart or redeploy.

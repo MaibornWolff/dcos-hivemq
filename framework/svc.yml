@@ -16,6 +16,9 @@ pods:
       - {{JAVA_URI}}
       - {{BOOTSTRAP_URI}}
       - {{JQ_URI}}
+      {{#TASKCFG_ALL_ENABLE_USERS}}
+      - {{RBAC_URI}}
+      {{/TASKCFG_ALL_ENABLE_USERS}}
     tasks:
       node:
         {{#TASKCFG_ALL_ENABLE_TLS_LISTENER}}
@@ -57,6 +60,10 @@ pods:
           sed -i -e '41d' $MESOS_SANDBOX/hivemq-4.0.2/bin/run.sh
           if [ ! -z "$LICENSE_FILE" ]; then
             echo "$LICENSE_FILE" | base64 -d > $MESOS_SANDBOX/hivemq-4.0.2/license/hivemq.lic
+          fi
+
+          if [ $ENABLE_USERS ]; then
+            mv hivemq-file-rbac-extension hivemq-4.0.2/extensions/
           fi
 
           chmod 755 $MESOS_SANDBOX/hivemq-4.0.2/bin/run.sh
@@ -121,6 +128,15 @@ pods:
   #                sleep 5
   #             fi
   #            done
+{{#TASKCFG_ALL_ENABLE_USERS}}
+      add_user:
+        goal: ONCE
+        cpus: 0.1
+        memory: 128
+        cmd: |
+          echo "I would be adding user $USER with password $PASSWORD and role $ROLE"
+{{/TASKCFG_ALL_ENABLE_USERS}}
+
   slave:
     count: {{NODE_COUNT}}
     allow-decommission: true
@@ -135,6 +151,9 @@ pods:
       - {{JAVA_URI}}
       - {{BOOTSTRAP_URI}}
       - {{JQ_URI}}
+      {{#TASKCFG_ALL_ENABLE_USERS}}
+      - {{RBAC_URI}}
+      {{/TASKCFG_ALL_ENABLE_USERS}}
     tasks:
       node:
         {{#TASKCFG_ALL_ENABLE_TLS_LISTENER}}
@@ -168,6 +187,10 @@ pods:
           sed -i -e '41d' $MESOS_SANDBOX/hivemq-4.0.2/bin/run.sh
           if [ ! -z "$LICENSE_FILE" ]; then
             echo "$LICENSE_FILE" | base64 -d > $MESOS_SANDBOX/hivemq-4.0.2/license/hivemq.lic
+          fi
+
+          if [ $ENABLE_USERS ]; then
+            mv hivemq-file-rbac-extension hivemq-4.0.2/extensions/
           fi
 
           chmod 755 $MESOS_SANDBOX/hivemq-4.0.2/bin/run.sh
@@ -232,6 +255,14 @@ pods:
 #                sleep 5
 #             fi
 #            done
+{{#TASKCFG_ALL_ENABLE_USERS}}
+      add_user:
+        goal: ONCE
+        cpus: 0.1
+        memory: 128
+        cmd: |
+          echo "I would be adding user $USER with password $PASSWORD and role $ROLE"
+{{/TASKCFG_ALL_ENABLE_USERS}}
 plans:
   deploy:
     strategy: serial
@@ -259,3 +290,18 @@ plans:
         pod: slave
         steps:
           - default: [[decommission_task], [node]]
+{{#TASKCFG_ALL_ENABLE_USERS}}
+  add_user:
+    strategy: parallel
+    phases:
+      master-parallel-phase:
+        strategy: parallel
+        pod: master
+        steps:
+          - default: [[add_user]]
+      slave-serial-phase:
+        strategy: parallel
+        pod: slave
+        steps:
+          - default: [[add_user]]
+{{/TASKCFG_ALL_ENABLE_USERS}}

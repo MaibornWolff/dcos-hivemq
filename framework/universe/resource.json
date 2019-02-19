@@ -10,7 +10,8 @@
       "scheduler-zip": "http://minio.marathon.l4lb.thisdcos.directory:9000/artifacts/hivemq/operator-scheduler.zip",
       "svc": "http://minio.marathon.l4lb.thisdcos.directory:9000/artifacts/hivemq/svc.yml",
       "config-template": "http://minio.marathon.l4lb.thisdcos.directory:9000/artifacts/hivemq/config.xml.mustache",
-      "jq": "https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64"
+      "jq": "https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64",
+      "rbac-plugin": "https://www.hivemq.com/releases/extensions/hivemq-file-rbac-extension-4.0.0.zip"
     }
   },
   "images": {

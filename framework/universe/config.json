@@ -125,6 +125,11 @@
       "description": "HiveMQ pod configuration properties",
       "type": "object",
       "properties": {
+        "enable_user_management": {
+          "description": "Enable user management via RBAC Plugin (see readme)",
+          "type": "boolean",
+          "default": true
+        },
         "enable_websocket_listener": {
           "description": "Expose a websocket connection",
           "type": "boolean",

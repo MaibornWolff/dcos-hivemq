@@ -32,19 +32,31 @@ pods:
           websocket:
             port: {{TASKCFG_ALL_WEBSOCKET_PORT}}
             advertise: true
+            vip:
+              prefix: ws
+              port: {{TASKCFG_ALL_WEBSOCKET_PORT}}
       {{/TASKCFG_ALL_ENABLE_WEBSOCKET_LISTENER}}
       {{#TASKCFG_MASTER_ENABLE_CONTROL_CENTER}}
           control-center:
             port: {{TASKCFG_MASTER_CONTROL_CENTER_PORT}}
             advertise: true
+            vip:
+              prefix: cc
+              port: {{TASKCFG_MASTER_CONTROL_CENTER_PORT}}
       {{/TASKCFG_MASTER_ENABLE_CONTROL_CENTER}}
           mqtt-tcp:
             port: {{TASKCFG_ALL_MQTT_PORT}}
             advertise: true
+            vip:
+              prefix: mqtt
+              port: {{TASKCFG_ALL_MQTT_PORT}}
       {{#TASKCFG_ALL_ENABLE_TLS_LISTENER}}
           mqtt-tls:
             port: {{TASKCFG_ALL_TLS_PORT}}
             advertise: true
+            vip:
+              prefix: mqtt-tls
+              port: {{TASKCFG_ALL_TLS_PORT}}
       {{/TASKCFG_ALL_ENABLE_TLS_LISTENER}}
         goal: RUNNING
         cpus: {{NODE_CPUS}}
@@ -148,9 +160,15 @@ pods:
         ports:
           mqtt-tcp:
             port: {{TASKCFG_ALL_MQTT_PORT}}
+            vip:
+              prefix: mqtt
+              port: {{TASKCFG_ALL_MQTT_PORT}}
           {{#TASKCFG_ALL_ENABLE_TLS_LISTENER}}
           mqtt-tls:
             port: {{TASKCFG_ALL_TLS_PORT}}
+            vip:
+              prefix: mqtt-tls
+              port: {{TASKCFG_ALL_TLS_PORT}}
           {{/TASKCFG_ALL_ENABLE_TLS_LISTENER}}
           {{#TASKCFG_ALL_ENABLE_CLUSTER}}
           tcp-discovery:
@@ -159,6 +177,9 @@ pods:
           {{#TASKCFG_ALL_ENABLE_WEBSOCKET_LISTENER}}
           websocket:
             port: {{TASKCFG_ALL_WEBSOCKET_PORT}}
+            vip:
+              prefix: ws
+              port: {{TASKCFG_ALL_WEBSOCKET_PORT}}
           {{/TASKCFG_ALL_ENABLE_WEBSOCKET_LISTENER}}
         cmd: |
           ./bootstrap -resolve-hosts=master-0-node.$FRAMEWORK_HOST,master-1-node.$FRAMEWORK_HOST

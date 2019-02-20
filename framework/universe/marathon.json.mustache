@@ -33,7 +33,7 @@
     "FRAMEWORK_LOG_LEVEL": "{{service.log_level}}",
     "MESOS_API_VERSION": "V1",
 
-    "NODE_COUNT": "{{node.slave_count}}",
+    "NODE_COUNT": "{{node.count}}",
     "NODE_PLACEMENT": "{{{node.placement_constraint}}}",
     {{#service.virtual_network_enabled}}
     "ENABLE_VIRTUAL_NETWORK": "yes",
@@ -50,6 +50,7 @@
     "BOOTSTRAP_URI": "{{resource.assets.uris.bootstrap-zip}}",
     "HIVEMQ_URI": "{{resource.assets.uris.hivemq-zip}}",
     "JQ_URI": "{{resource.assets.uris.jq}}",
+    "S3_PLUGIN": "{{resource.assets.uris.s3-plugin}}",
     {{#service.service_account_secret}}
     "DCOS_SERVICE_ACCOUNT_CREDENTIAL": { "secret": "serviceCredential" },
     "MESOS_MODULES": "{\"libraries\":[{\"file\":\"libmesos-bundle\/lib\/mesos\/libdcos_security.so\",\"modules\":[{\"name\": \"com_mesosphere_dcos_ClassicRPCAuthenticatee\"},{\"name\":\"com_mesosphere_dcos_http_Authenticatee\",\"parameters\":[{\"key\":\"jwt_exp_timeout\",\"value\":\"5mins\"},{\"key\":\"preemptive_refresh_duration\",\"value\":\"30mins\"}]}]}]}",
@@ -59,6 +60,11 @@
     "LIBMESOS_URI": "{{resource.assets.uris.libmesos-bundle-tar-gz}}",
 
     "TASKCFG_ALL_ENABLE_CLUSTER": "{{hivemq.enable_cluster}}",
+    "TASKCFG_ALL_S3_HOST": "{{hivemq.cluster_discovery_storage}}",
+    "TASKCFG_ALL_S3_BUCKET": "{{hivemq.cluster_discovery_bucket_name}}",
+    "TASKCFG_ALL_S3_PATH_STYLE": "{{hivemq.s3_use_path_style}}",
+    "TASKCFG_ALL_AWS_ACCESS_KEY_ID": "{{hivemq.aws_access_key_id}}",
+    "TASKCFG_ALL_AWS_SECRET_ACCESS_KEY": "{{hivemq.aws_secret_access_key}}",
     "TASKCFG_ALL_ENABLE_WEBSOCKET_LISTENER": "{{hivemq.enable_websocket_listener}}",
     "TASKCFG_ALL_WEBSOCKET_PORT": "{{hivemq.websocket_port}}",
     "TASKCFG_ALL_MQTT_PORT": "{{hivemq.websocket_port}}",
@@ -67,10 +73,9 @@
     "TASKCFG_ALL_ALLOW_WILDCARD_SUBSCRIPTIONS": "{{hivemq.allow_wildcard_subscriptions}}",
     "TASKCFG_ALL_ALLOW_SHARED_SUBSCRIPTIONS": "{{hivemq.allow_shared_subscriptions}}",
     "TASKCFG_ALL_MQTT_PORT": "{{hivemq.mqtt_port}}",
-    "TASKCFG_MASTER_CONTROL_CENTER_PORT": "{{hivemq.control_center_port}}",
+    "TASKCFG_ALL_CONTROL_CENTER_PORT": "{{hivemq.control_center_port}}",
 
-    "TASKCFG_MASTER_ENABLE_CONTROL_CENTER": "{{hivemq.enable_control_center}}",
-    "TASKCFG_SLAVE_ENABLE_CONTROL_CENTER": "false",
+    "TASKCFG_ALL_ENABLE_CONTROL_CENTER": "{{hivemq.enable_control_center}}",
 
     "TASKCFG_ALL_ENABLE_USAGE_STATISTICS": "{{hivemq.enable_usage_statistics}}",
     "TASKCFG_ALL_DISCOVERY_PORT": "{{hivemq.discovery_port}}",

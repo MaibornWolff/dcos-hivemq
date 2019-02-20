@@ -69,12 +69,12 @@
       "description": "hivemq pod configuration properties",
       "type": "object",
       "properties": {
-        "slave_count": {
-          "title": "Slave Node Count",
-          "description": "There will always be two additional master nodes",
+        "count": {
+          "title": "Node Count",
+          "description": "The number of nodes to be created",
           "type": "integer",
-          "default": 1,
-          "minimum": 0
+          "default": 3,
+          "minimum": 1
         },
         "placement_constraint": {
           "title": "Placement constraint",
@@ -114,7 +114,7 @@
         }
       },
       "required": [
-        "slave_count",
+        "count",
         "cpus",
         "mem",
         "disk",
@@ -158,6 +158,31 @@
         "enable_cluster": {
           "description": "Enable cluster support",
           "type": "boolean",
+          "default": true
+        },
+        "cluster_discovery_storage": {
+          "type": "string",
+          "description": "S3 storage to use for cluster discovery, this can be a URL or hostname",
+          "default": "http://minio.marathon.l4lb.thisdcos.directory:9000"
+        },
+        "cluster_discovery_bucket_name": {
+          "type": "string",
+          "description": "Bucket to use for S3 cluster discovery",
+          "default": "hivemq"
+        },
+        "aws_access_key_id": {
+          "type": "string",
+          "description": "Id for account to access S3 storage",
+          "default": "minio"
+        },
+        "aws_secret_access_key": {
+          "type": "string",
+          "description": "Secret key to use for authentication at S3 storage",
+          "default": "minio123"
+        },
+        "s3_use_path_style": {
+          "type": "boolean",
+          "description": "If unselected, the bucket name will be prepended to the domain",
           "default": true
         },
         "discovery_port": {

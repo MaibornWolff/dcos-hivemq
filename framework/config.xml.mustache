@@ -72,23 +72,7 @@
             </tcp>
         </transport>
         <discovery>
-            <static>
-                <node>
-                    <!-- replace this IP with the IP address of your interface -->
-                    <host>{{MESOS_CONTAINER_IP}}</host>
-                    <port>{{DISCOVERY_PORT}}</port>
-                </node>
-                <node>
-                    <!-- this IP will be replaced by the IP of the primary master during startup -->
-                    <host>${MASTER_0_IP}</host>
-                    <port>{{DISCOVERY_PORT}}</port>
-                </node>
-                <node>
-                    <!-- this IP will be replaced by the IP of the secondary master during startup -->
-                    <host>${MASTER_1_IP}</host>
-                    <port>{{DISCOVERY_PORT}}</port>
-                </node>
-            </static>
+            <extension/>
         </discovery>
     </cluster>
 

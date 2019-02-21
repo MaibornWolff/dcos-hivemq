@@ -1,4 +1,5 @@
 package com.mesosphere.sdk.operator.scheduler;
+// copied from com.mesosphere.sdk.scheduler.SchedulerRunner - only modified to use Customized* classes
 
 import com.mesosphere.sdk.config.validate.PodSpecsCannotUseUnsupportedFeatures;
 import com.mesosphere.sdk.framework.FrameworkConfig;

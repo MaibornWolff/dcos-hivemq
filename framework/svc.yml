@@ -17,7 +17,12 @@ pods:
       - {{JAVA_URI}}
       - {{BOOTSTRAP_URI}}
       - {{JQ_URI}}
+{{#ETCD_ENABLE}}
+      - {{ETCD_PLUGIN}}
+{{/ETCD_ENABLE}}
+{{#S3_ENABLE}}
       - {{S3_PLUGIN}}
+{{/S3_ENABLE}}
     tasks:
       node:
         {{#TASKCFG_ALL_ENABLE_TLS_LISTENER}}
@@ -71,11 +76,16 @@ pods:
             echo "$LICENSE_FILE" | base64 -d > $MESOS_SANDBOX/hivemq-4.0.2/license/hivemq.lic
           fi
 
+  {{#ETCD_ENABLE}}
+          mv hivemq-etcd-cluster-discovery-extension hivemq-4.0.2/extensions/
+  {{/ETCD_ENABLE}}
+  {{#S3_ENABLE}}
           mv hivemq-s3-cluster-discovery-extension hivemq-4.0.2/extensions/
           sed -i "s s3\.amazonaws\.com $S3_HOST g" hivemq-4.0.2/extensions/hivemq-s3-cluster-discovery-extension/s3discovery.properties
           sed -i "s s3-bucket-name:hivemq s3-bucket-name:$S3_BUCKET g" hivemq-4.0.2/extensions/hivemq-s3-cluster-discovery-extension/s3discovery.properties
+          sed -i "s file-prefix:hivemq/cluster/nodes/ file-prefix:$S3_FILE_PREFIX g" hivemq-4.0.2/extensions/hivemq-s3-cluster-discovery-extension/s3discovery.properties
           echo -e "\ns3-path-style-access:$S3_PATH_STYLE" >> hivemq-4.0.2/extensions/hivemq-s3-cluster-discovery-extension/s3discovery.properties
-          cat hivemq-4.0.2/extensions/hivemq-s3-cluster-discovery-extension/s3discovery.properties
+  {{/S3_ENABLE}}
 
           chmod 755 $MESOS_SANDBOX/hivemq-4.0.2/bin/run.sh
           JAVA_HOME=$MESOS_SANDBOX/jdk-11.0.2 PATH=$MESOS_SANDBOX/jdk-11.0.2/bin/:$PATH $MESOS_SANDBOX/hivemq-4.0.2/bin/run.sh

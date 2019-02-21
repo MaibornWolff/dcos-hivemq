@@ -1,11 +1,11 @@
 package com.mesosphere.sdk.operator.scheduler;
+// copied from com.mesosphere.sdk.scheduler.decommission.DecommissionPlanFactory - slightly modified to add new step
 
 import com.mesosphere.sdk.offer.Constants;
 import com.mesosphere.sdk.offer.LoggingUtils;
 import com.mesosphere.sdk.offer.ResourceUtils;
 import com.mesosphere.sdk.offer.TaskException;
 import com.mesosphere.sdk.offer.taskdata.TaskLabelReader;
-import com.mesosphere.sdk.scheduler.decommission.DecommissionPlanFactory;
 import com.mesosphere.sdk.scheduler.decommission.EraseTaskStateStep;
 import com.mesosphere.sdk.scheduler.decommission.TriggerDecommissionStep;
 import com.mesosphere.sdk.scheduler.plan.*;
@@ -33,7 +33,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
@@ -138,6 +137,7 @@ public class CustomizedDecommissionPlanFactory {
         for (Map.Entry<PodKey, Collection<Protos.TaskInfo>> entry : podsToDecommission.entrySet()) { // there are multiple instances of each pod
             List<Step> steps = new ArrayList<>();
 
+// this is the modified part - Alwin Ebermann
             // 0.2 Get the podSpec required to create a new DeploymentStep
             PodSpec thisPodSpec = serviceSpec.getPods().stream()
                     .filter(podSpec -> podSpec.getType().equals(entry.getKey().getPodType()))
@@ -147,6 +147,7 @@ public class CustomizedDecommissionPlanFactory {
             // 0.5 Start a task to put node into maintenance mode and wait for everything to be ready before killing the node
             DefaultStepFactory factory = new DefaultStepFactory(store, stateStore, namespace);
             steps.add(factory.getStep(new DefaultPodInstance(thisPodSpec, entry.getKey().podIndex), Collections.singletonList(DECOMMISSION_TASK_NAME)));
+// this was the modified part - Alwin Ebermann
 
             // 1. Kill pod's tasks
             steps.addAll(entry.getValue().stream() // this loops over "node" and other tasks that could be running

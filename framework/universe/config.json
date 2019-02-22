@@ -204,12 +204,22 @@
         "endpoint": {
           "description": "etcd endpoint to use, hostname or ip",
           "type": "string",
-          "default": "172.17.0.4"
+          "default": "api.etcd.l4lb.thisdcos.directory"
         },
         "port": {
           "description": "etcd port to connect at",
           "type": "integer",
           "default": 2379
+        },
+        "use_tls": {
+          "description": "enable transport encryption when connecting to etcd",
+          "type": "boolean",
+          "default": false
+        },
+        "use_dcos_ca": {
+          "description": "use the DC/OS certificate bundle for verifying etcd's authority, enable this if your certificate is not universally trusted",
+          "type": "boolean",
+          "default": false
         },
         "key": {
           "description": "Key to store discovery entries at",

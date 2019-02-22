@@ -78,6 +78,9 @@ pods:
 
   {{#ETCD_ENABLE}}
           mv hivemq-etcd-cluster-discovery-extension hivemq-4.0.2/extensions/
+          if [ "$HIVEMQ_ETCD_USE_DCOS_CA" == "true" ] ; then
+            export HIVEMQ_ETCD_CA_PATH=/run/dcos/pki/CA/ca-bundle.crt
+          fi
   {{/ETCD_ENABLE}}
   {{#S3_ENABLE}}
           mv hivemq-s3-cluster-discovery-extension hivemq-4.0.2/extensions/

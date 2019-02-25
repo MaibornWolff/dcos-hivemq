@@ -12,6 +12,10 @@ pods:
       {{VIRTUAL_NETWORK_NAME}}:
         labels: {{VIRTUAL_NETWORK_PLUGIN_LABELS}}
     {{/ENABLE_VIRTUAL_NETWORK}}
+    volume:
+      path: "hivemq-data"
+      type: {{NODE_DISK_TYPE}}
+      size: {{NODE_DISK}}
     uris:
       - {{HIVEMQ_URI}}
       - {{JAVA_URI}}
@@ -96,9 +100,14 @@ pods:
 {{#TASKCFG_ALL_ENABLE_CLUSTER}}
           mv hivemq-dcos-cluster-discovery-extension hivemq-4.0.2/extensions/
 {{/TASKCFG_ALL_ENABLE_CLUSTER}}
-          if [ $ENABLE_USERS ]; then
-            mv hivemq-file-rbac-extension hivemq-4.0.2/extensions/
+{{#TASKCFG_ALL_ENABLE_USERS}}
+          mv hivemq-file-rbac-extension/credentials.xml hivemq-data/credentials.xml
+          if [ "$HASH_USER_PASSWORDS" = true ]; then
+            sed -i "s/PLAIN/HASHED/g" hivemq-file-rbac-extension/extension-config.xml
           fi
+          mv hivemq-file-rbac-extension hivemq-4.0.2/extensions/
+          ln -s $MESOS_SANDBOX/hivemq-data/credentials.xml $MESOS_SANDBOX/hivemq-4.0.2/extensions/hivemq-file-rbac-extension/credentials.xml
+{{/TASKCFG_ALL_ENABLE_USERS}}
 
           chmod 755 $MESOS_SANDBOX/hivemq-4.0.2/bin/run.sh
           JAVA_HOME=$MESOS_SANDBOX/jdk-11.0.2 PATH=$MESOS_SANDBOX/jdk-11.0.2/bin/:$PATH $MESOS_SANDBOX/hivemq-4.0.2/bin/run.sh
@@ -106,10 +115,6 @@ pods:
           config.xml:
             template: config.xml.mustache
             dest: hivemq-4.0.2/conf/config.xml
-        volume:
-          path: "hivemq-data"
-          type: {{NODE_DISK_TYPE}}
-          size: {{NODE_DISK}}
         readiness-check:
           cmd: |
             pgrep -f hivemq\.jar
@@ -168,7 +173,8 @@ pods:
         cpus: 0.1
         memory: 128
         cmd: |
-          echo "I would be adding user $USER with password $PASSWORD and role $ROLE"
+          echo $USERS_FILE
+          echo $USERS_FILE > hivemq-data/credentials.xml
 {{/TASKCFG_ALL_ENABLE_USERS}}
 plans:
   deploy:
@@ -191,14 +197,9 @@ plans:
   add_user:
     strategy: parallel
     phases:
-      master-parallel-phase:
+      parallel-phase:
         strategy: parallel
-        pod: master
-        steps:
-          - default: [[add_user]]
-      slave-serial-phase:
-        strategy: parallel
-        pod: slave
+        pod: hivemq
         steps:
           - default: [[add_user]]
 {{/TASKCFG_ALL_ENABLE_USERS}}

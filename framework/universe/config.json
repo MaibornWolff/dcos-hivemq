@@ -132,11 +132,6 @@
               "type": "boolean",
               "default": false
             },
-            "enable_user_management": {
-              "description": "Enable user management via RBAC Plugin (see readme)",
-              "type": "boolean",
-              "default": true
-            },
             "allow_shared_subscriptions": {
               "description": "Allow shared subscriptions",
               "type": "boolean",
@@ -151,6 +146,16 @@
               "type": "string",
               "description": "base64 encoded license file",
               "default": ""
+            },
+            "enable_user_management": {
+              "description": "Enable user management via RBAC Plugin (see readme)",
+              "type": "boolean",
+              "default": true
+            },
+            "use_hashed_passwords": {
+              "description": "Use hashed or plaintext passwords, see readme for setting users and passwords",
+              "type": "boolean",
+              "default": false
             }
           }
         },

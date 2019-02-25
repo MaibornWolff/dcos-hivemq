@@ -1,5 +1,8 @@
 # HiveMQ for DC/OS
 
+### Project status
+This package is currently in alpha. Do not use in production!
+
 ## Setup
 
 2. Setup minidcos as per instructions or use your existing cluster
@@ -35,11 +38,22 @@ When updating the resources of running pods, they will be recreated one after th
 cluster needs to be healthy and the node will be put in maintenance mode. Only when all clients have disconnected and
 the cluster is still healthy, will the node be replaced.
 
-### Add users
+### User Management
 
-If you enable the user management, you can add users during runtime with this command:
+If you enable the user management, you can replace the static user configuration on all nodes:
 ```
-dcos hivemq plan start add_user -p USER=Alwin -p PASSWORD=test -p ROLE=superuser
+dcos package install --cli --yes hivemq
+dcos hivemq plan start add_user -p USERS_FILE=$(cat credentials.xml)
 ```
 
-Users will not persist during pod restart or redeploy.
+Users will not persist during pod redeploy or on configuration changes.
+
+### Acknowledgements
+
+This framework is based on the DC/OS SDK and was developed using dcosdev. Thanks to Mesosphere for providing these tools.
+
+### Disclaimer
+
+This project is currently not associated with dc-square, the makers of HiveMQ.
+
+This software is provided as-is. Use at your own risk.

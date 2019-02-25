@@ -122,73 +122,97 @@
       ]
 	},
     "hivemq": {
-      "description": "HiveMQ pod configuration properties",
       "type": "object",
       "properties": {
-        "enable_websocket_listener": {
-          "description": "Expose a websocket connection",
-          "type": "boolean",
-          "default": false
+        "core_settings": {
+          "type": "object",
+          "properties": {
+            "allow_wildcard_subscriptions": {
+              "description": "Allow Wildcard Subscriptions",
+              "type": "boolean",
+              "default": false
+            },
+            "allow_shared_subscriptions": {
+              "description": "Allow shared subscriptions",
+              "type": "boolean",
+              "default": false
+            },
+            "enable_usage_statistics": {
+              "description": "Forward anonymous usage statistics to HiveMQ developers",
+              "type": "boolean",
+              "default": false
+            },
+            "license_file": {
+              "type": "string",
+              "description": "base64 encoded license file",
+              "default": ""
+            }
+          }
         },
-        "websocket_port": {
-          "description": "Expose the websocket connection on this port",
-          "type": "integer",
-          "default": 8000
+        "mqtt_port_settings": {
+          "type": "object",
+          "properties": {
+            "mqtt_port": {
+              "description": "Outside port to use for communication with cluster",
+              "type": "integer",
+              "default": 1883
+            },
+            "enable_websocket_listener": {
+              "description": "Expose a websocket connection",
+              "type": "boolean",
+              "default": false
+            },
+            "websocket_port": {
+              "description": "Expose the websocket connection on this port",
+              "type": "integer",
+              "default": 8000
+            },
+            "tls_websocket_port": {
+              "description": "Will only take effect if TLS is enabled",
+              "type": "integer",
+              "default": 8001
+            },
+            "enable_tls": {
+              "description": "Use transport encryption. See readme for requirements!",
+              "type": "boolean",
+              "default": false
+            },
+            "tls_port": {
+              "description": "Port for TLS connections",
+              "type": "integer",
+              "default": 8883
+            },
+            "enable_control_center": {
+              "description": "Enable control center",
+              "type": "boolean",
+              "default": false
+            },
+            "control_center_port": {
+              "description": "Port to expose the control center",
+              "type": "integer",
+              "default": 8080
+            },
+            "control_center_tls_port": {
+              "description": "Will only take effect if TLS is enabled",
+              "type": "integer",
+              "default": 8443
+            }
+          }
         },
-        "enable_tls_listener": {
-          "description": "Use transport encryption. You have to provide a keystore and a truststore",
-          "type": "boolean",
-          "default": false
-        },
-        "tls_port": {
-          "description": "Port for TLS connections",
-          "type": "integer",
-          "default": 8883
-        },
-        "allow_wildcard_subscriptions": {
-          "description": "Allow Wildcard Subscriptions",
-          "type": "boolean",
-          "default": false
-        },
-        "allow_shared_subscriptions": {
-          "description": "Allow shared subscriptions",
-          "type": "boolean",
-          "default": false
-        },
-        "enable_cluster": {
-          "description": "Enable cluster support",
-          "type": "boolean",
-          "default": true
-        },
-        "discovery_port": {
-          "description": "Port to use for node discovery within the cluster",
-          "type": "integer",
-          "default": 7800
-        },
-        "mqtt_port": {
-          "description": "Port to use for communication with cluster",
-          "type": "integer",
-          "default": 1883
-        },
-        "enable_control_center": {
-          "description": "Enable control center",
-          "type": "boolean",
-          "default": false
-        },
-        "control_center_port": {
-          "description": "Port to expose the control center",
-          "type": "integer",
-          "default": 8080
-        },
-        "enable_usage_statistics": {
-          "description": "Forward anonymous usage statistics to HiveMQ developers",
-          "type": "boolean",
-          "default": false
-        },
-        "license_file": {
-          "type": "string",
-          "description": "base64 encoded license file",
-          "default": ""
+        "cluster_settings": {
+          "type": "object",
+          "properties": {
+            "enable_cluster": {
+              "description": "Enable cluster support",
+              "type": "boolean",
+              "default": true
+            },
+            "discovery_port": {
+              "description": "Port to use for node discovery within the cluster",
+              "type": "integer",
+              "default": 7800
+            }
+          }
         }
       }
     }

@@ -62,7 +62,23 @@ pods:
             vip:
               prefix: mqtt-tls
               port: {{TASKCFG_ALL_TLS_PORT}}
-      {{/TASKCFG_ALL_ENABLE_TLS_LISTENER}}
+          {{#TASKCFG_ALL_ENABLE_WEBSOCKET_LISTENER}}
+          websocket-tls:
+            port: {{TASKCFG_ALL_TLS_WEBSOCKET_PORT}}
+            advertise: true
+            vip:
+              prefix: websocket-tls
+              port: {{TASKCFG_ALL_TLS_WEBSOCKET_PORT}}
+          {{/TASKCFG_ALL_ENABLE_WEBSOCKET_LISTENER}}
+          {{#TASKCFG_ALL_ENABLE_CONTROL_CENTER}}
+          control-center-tls:
+            port: {{TASKCFG_ALL_CONTROL_CENTER_TLS_PORT}}
+            advertise: true
+            vip:
+              prefix: cc-tls
+              port: {{TASKCFG_ALL_CONTROL_CENTER_TLS_PORT}}
+          {{/TASKCFG_ALL_ENABLE_CONTROL_CENTER}}
+     {{/TASKCFG_ALL_ENABLE_TLS_LISTENER}}
         goal: RUNNING
         cpus: {{NODE_CPUS}}
         memory: {{NODE_MEM}}

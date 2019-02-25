@@ -6,7 +6,7 @@
   "minDcosReleaseVersion": "1.11",
   "name": "hivemq",
   "version": "{{package-version}}",
-  "maintainer": "support@YOURNAMEHERE.COM",
+  "maintainer": "https://github.com/MaibornWolff/dcos-hivemq",
   "description": "HiveMQ on DC/OS",
   "selected": false,
   "framework": true,

@@ -1,4 +1,5 @@
 package com.mesosphere.sdk.operator.scheduler;
+// copied from com.mesosphere.sdk.scheduler.SchedulerBuilder - only modified to use Customized* classes
 
 import com.mesosphere.sdk.config.ConfigurationUpdater;
 import com.mesosphere.sdk.config.DefaultConfigurationUpdater;

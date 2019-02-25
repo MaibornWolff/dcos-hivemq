@@ -18,18 +18,8 @@ public class Main {
             throw new IllegalArgumentException("Expected one file argument, got: " + Arrays.toString(args));
         }
         File yamlSpecFile = new File(args[0]);
-
-//        SchedulerRunner
-//                .fromRawServiceSpec(
-//                        RawServiceSpec.newBuilder(yamlSpecFile).build(),
-//                        SchedulerConfig.fromEnv(),
-//                        yamlSpecFile.getParentFile())
-//                .run();
-
-
         CustomizedSchedulerRunner.fromSchedulerBuilder(createSchedulerBuilder(yamlSpecFile))
                 .run();
-
     }
 
     private static CustomizedSchedulerBuilder createSchedulerBuilder(File yamlSpecFile) throws Exception {

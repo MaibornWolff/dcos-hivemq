@@ -2,12 +2,6 @@
 
 ## Setup
 
-1. Download the following files into `/framework` or replace URLs in `/framework/universe/resource.json`:
-```
-https://download.java.net/java/GA/jdk11/9/GPL/openjdk-11.0.2_linux-x64_bin.tar.gz
-https://www.hivemq.com/releases/hivemq-4.0.2.zip
-https://downloads.mesosphere.com/java/server-jre-8u162-linux-x64.tar.gz
-```
 2. Setup minidcos as per instructions or use your existing cluster
 3. Install dcosdev and setup an asset repository https://github.com/mesosphere/dcosdev
 3. Run `dcosdev java build` to build the modified scheduler

@@ -1,2 +1,5 @@
 framework/*.zip
 framework/*.tar.gz
+.idea/
+framework/.gradle
+framework/build

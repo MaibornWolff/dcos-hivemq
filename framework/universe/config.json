@@ -155,7 +155,7 @@
             "enable_user_management": {
               "description": "Enable user management via RBAC Plugin (see readme)",
               "type": "boolean",
-              "default": true
+              "default": false
             },
             "use_hashed_passwords": {
               "description": "Use hashed or plaintext passwords, see readme for setting users and passwords",

@@ -1,9 +1,9 @@
 {
   "assets": {
     "uris": {
-      "jre-tar-gz": "http://minio.marathon.l4lb.thisdcos.directory:9000/artifacts/hivemq/server-jre-8u162-linux-x64.tar.gz",
-      "jre-11-tar-gz": "http://minio.marathon.l4lb.thisdcos.directory:9000/artifacts/hivemq/openjdk-11.0.2_linux-x64_bin.tar.gz",
-      "hivemq-zip": "http://minio.marathon.l4lb.thisdcos.directory:9000/artifacts/hivemq/hivemq-4.0.2.zip",
+      "jre-tar-gz": "https://downloads.mesosphere.com/java/server-jre-8u162-linux-x64.tar.gz",
+      "jre-11-tar-gz": "https://download.java.net/java/GA/jdk11/9/GPL/openjdk-11.0.2_linux-x64_bin.tar.gz",
+      "hivemq-zip": "https://www.hivemq.com/releases/hivemq-4.0.2.zip",
       "libmesos-bundle-tar-gz": "https://downloads.mesosphere.com/libmesos-bundle/libmesos-bundle-1.11.0.tar.gz",
       "bootstrap-zip": "https://downloads.mesosphere.com/dcos-commons/artifacts/0.55.2/bootstrap.zip",
       "executor-zip": "https://downloads.mesosphere.com/dcos-commons/artifacts/0.55.2/executor.zip",
@@ -11,7 +11,7 @@
       "svc": "http://minio.marathon.l4lb.thisdcos.directory:9000/artifacts/hivemq/svc.yml",
       "config-template": "http://minio.marathon.l4lb.thisdcos.directory:9000/artifacts/hivemq/config.xml.mustache",
       "jq": "https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64",
-      "dcos-plugin": "http://minio.marathon.l4lb.thisdcos.directory:9000/artifacts/hivemq/hivemq-dcos-cluster-discovery-extension-0.1-distribution.zip",
+      "dcos-plugin": "https://github.com/MaibornWolff/hivemq-dcos-cluster-discovery-plugin/releases/download/v0.1/hivemq-dcos-cluster-discovery-extension-0.1-distribution.zip",
       "rbac-plugin": "https://www.hivemq.com/releases/extensions/hivemq-file-rbac-extension-4.0.0.zip",
       "prometheus-plugin": "https://www.hivemq.com/releases/extensions/hivemq-prometheus-extension-4.0.0.zip"
     }

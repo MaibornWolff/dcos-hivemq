@@ -8,8 +8,10 @@ This package is currently in alpha. Do not use in production!
 2. Setup minidcos as per instructions or use your existing cluster
 3. Install dcosdev and setup an asset repository https://github.com/mesosphere/dcosdev
 3. Run `dcosdev java build` to build the modified scheduler
-4. Run `dcosdev up` in /framwork to upload the resources
+4. Run `dcosdev up` in /framework to upload the resources
 5. Install package
+
+## Features
 
 ### TLS
 

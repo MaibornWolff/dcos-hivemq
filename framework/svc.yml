@@ -106,6 +106,9 @@ pods:
         cmd: |
           ./bootstrap
           export HIVEMQ_DATA_FOLDER=$MESOS_SANDBOX/hivemq-data
+          mkdir -p $MESOS_SANDBOX/hivemq-data/extensions
+          rm -rf $MESOS_SANDBOX/hivemq-4.0.2/extensions
+          ln -s $MESOS_SANDBOX/hivemq-data/extensions $MESOS_SANDBOX/hivemq-4.0.2
           sed -i -e '41d' $MESOS_SANDBOX/hivemq-4.0.2/bin/run.sh
           if [ ! -z "$LICENSE_FILE" ]; then
             echo "$LICENSE_FILE" | base64 -d > $MESOS_SANDBOX/hivemq-4.0.2/license/hivemq.lic
@@ -115,19 +118,21 @@ pods:
           fi
 
 {{#TASKCFG_ALL_ENABLE_CLUSTER}}
-          mv hivemq-dcos-cluster-discovery-extension hivemq-4.0.2/extensions/
+          mv hivemq-dcos-cluster-discovery-extension hivemq-data/extensions/ 2>/dev/null # this will fail if node is restarted
 {{/TASKCFG_ALL_ENABLE_CLUSTER}}
+          rm -rf hivemq-data/extensions/hivemq-prometheus-extension
 {{#TASKCFG_ALL_ENABLE_METRICS}}
-          mv hivemq-prometheus-extension hivemq-4.0.2/extensions/
-          sed -it "s/9399/$METRICS_PORT/g" hivemq-4.0.2/extensions/hivemq-prometheus-extension/prometheusConfiguration.properties
+          mv hivemq-prometheus-extension hivemq-data/extensions/
+          sed -it "s/9399/$METRICS_PORT/g" hivemq-data/extensions/hivemq-prometheus-extension/prometheusConfiguration.properties
 {{/TASKCFG_ALL_ENABLE_METRICS}}
+          rm -rf hivemq-data/extensions/hivemq-file-rbac-extension
 {{#TASKCFG_ALL_ENABLE_USERS}}
-          mv hivemq-file-rbac-extension/credentials.xml hivemq-data/credentials.xml
           if [ "$HASH_USER_PASSWORDS" = true ]; then
             sed -i "s/PLAIN/HASHED/g" hivemq-file-rbac-extension/extension-config.xml
           fi
-          mv hivemq-file-rbac-extension hivemq-4.0.2/extensions/
-          ln -s $MESOS_SANDBOX/hivemq-data/credentials.xml $MESOS_SANDBOX/hivemq-4.0.2/extensions/hivemq-file-rbac-extension/credentials.xml
+          mv hivemq-file-rbac-extension/credentials.xml hivemq-data/credentials.xml 2>/dev/null # if node is restarted, credentials wont be overwritten
+          mv hivemq-file-rbac-extension hivemq-data/extensions/
+          ln -s $MESOS_SANDBOX/hivemq-data/credentials.xml $MESOS_SANDBOX/hivemq-data/extensions/hivemq-file-rbac-extension/credentials.xml
 {{/TASKCFG_ALL_ENABLE_USERS}}
 
           chmod 755 $MESOS_SANDBOX/hivemq-4.0.2/bin/run.sh
@@ -157,7 +162,7 @@ pods:
         cmd: |
             mv ./jq-linux64 ./jq && chmod +x ./jq
             export NODE=$(echo $TASK_NAME | sed 's/decommission_task/node/')
-# the following lines can be enabled once HiveMQ actually opens the endpoint
+# the following lines can be enabled once HiveMQ opens endpoints for health and maintenance mode
 
 #            # Wait until cluster is healthy before putting node into maintenance mode
 #            while true
@@ -195,8 +200,16 @@ pods:
         memory: 128
         cmd: |
           echo $USERS_FILE
-          echo $USERS_FILE > hivemq-data/credentials.xml
+          echo $USERS_FILE > hivemq-data/extensions/credentials.xml
 {{/TASKCFG_ALL_ENABLE_USERS}}
+      add_plugin:
+        goal: ONCE
+        cpus: 0.1
+        memory: 128
+        cmd: |
+          echo "Downloading zip from $URL"
+          curl $URL -o extension.zip
+          unzip extension.zip -d hivemq-data/extensions/
 plans:
   deploy:
     strategy: serial
@@ -224,3 +237,11 @@ plans:
         steps:
           - default: [[add_user]]
 {{/TASKCFG_ALL_ENABLE_USERS}}
+  add_plugin:
+    strategy: parallel
+    phases:
+      parallel-phase:
+        strategy: parallel
+        pod: hivemq
+        steps:
+          - default: [[add_plugin]]

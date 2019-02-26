@@ -46,7 +46,18 @@ dcos package install --cli --yes hivemq
 dcos hivemq plan start add_user -p USERS_FILE=$(cat credentials.xml)
 ```
 
-Users will not persist during pod redeploy or on configuration changes.
+Users will not be populated to later created nodes.
+
+### Add Extensions During Runtime
+
+Additional extensions can be added to all running HiveMQ nodes with the following command:
+```
+dcos hivemq plan start add_plugin -p URL=https://url/to/extension.zip
+```
+Note that additional configuration is not possible. If you need non-standard configurations, please modify and reupload
+the extension ZIP to a public URL.
+
+Extensions will persist during restart and redeploy, but will not be transferred to later created nodes.
 
 ### Acknowledgements
 

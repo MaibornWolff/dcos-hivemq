@@ -21,12 +21,21 @@ pods:
       - {{JAVA_URI}}
       - {{BOOTSTRAP_URI}}
       - {{JQ_URI}}
-  {{#TASKCFG_ALL_ENABLE_CLUSTER}}
-      - {{DCOS_PLUGIN}}
-  {{/TASKCFG_ALL_ENABLE_CLUSTER}}
+      {{#TASKCFG_ALL_ENABLE_CLUSTER}}
+      - {{DCOS_URI}}
+      {{/TASKCFG_ALL_ENABLE_CLUSTER}}
+      {{#TASKCFG_ALL_ENABLE_METRICS}}
+      - {{PROMETHEUS_URI}}
+      {{/TASKCFG_ALL_ENABLE_METRICS}}
       {{#TASKCFG_ALL_ENABLE_USERS}}
       - {{RBAC_URI}}
       {{/TASKCFG_ALL_ENABLE_USERS}}
+    {{#LICENSE_SECRET}}
+    secrets:
+      license:
+        secret: {{LICENSE_SECRET}}
+        env-key: LICENSE
+    {{/LICENSE_SECRET}}
     tasks:
       node:
         {{#TASKCFG_ALL_ENABLE_TLS_LISTENER}}
@@ -62,6 +71,11 @@ pods:
             vip:
               prefix: mqtt
               port: {{TASKCFG_ALL_MQTT_PORT}}
+      {{#TASKCFG_ALL_ENABLE_METRICS}}
+          metrics:
+            port: {{TASKCFG_ALL_METRICS_PORT}}
+            advertise: true
+      {{/TASKCFG_ALL_ENABLE_METRICS}}
       {{#TASKCFG_ALL_ENABLE_TLS_LISTENER}}
           mqtt-tls:
             port: {{TASKCFG_ALL_TLS_PORT}}
@@ -96,10 +110,17 @@ pods:
           if [ ! -z "$LICENSE_FILE" ]; then
             echo "$LICENSE_FILE" | base64 -d > $MESOS_SANDBOX/hivemq-4.0.2/license/hivemq.lic
           fi
+          if [ ! -z "$LICENSE" ]; then
+            echo "$LICENSE"  > $MESOS_SANDBOX/hivemq-4.0.2/license/hivemq.lic
+          fi
 
 {{#TASKCFG_ALL_ENABLE_CLUSTER}}
           mv hivemq-dcos-cluster-discovery-extension hivemq-4.0.2/extensions/
 {{/TASKCFG_ALL_ENABLE_CLUSTER}}
+{{#TASKCFG_ALL_ENABLE_METRICS}}
+          mv hivemq-prometheus-extension hivemq-4.0.2/extensions/
+          sed -it "s/9399/$METRICS_PORT/g" hivemq-4.0.2/extensions/hivemq-prometheus-extension/prometheusConfiguration.properties
+{{/TASKCFG_ALL_ENABLE_METRICS}}
 {{#TASKCFG_ALL_ENABLE_USERS}}
           mv hivemq-file-rbac-extension/credentials.xml hivemq-data/credentials.xml
           if [ "$HASH_USER_PASSWORDS" = true ]; then

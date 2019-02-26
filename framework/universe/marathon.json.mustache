@@ -51,6 +51,8 @@
     "HIVEMQ_URI": "{{resource.assets.uris.hivemq-zip}}",
     "JQ_URI": "{{resource.assets.uris.jq}}",
     "RBAC_URI": "{{resource.assets.uris.rbac-plugin}}",
+    "PROMETHEUS_URI": "{{resource.assets.uris.prometheus-plugin}}",
+    "DCOS_URI": "{{resource.assets.uris.dcos-plugin}}",
 
     {{#service.service_account_secret}}
     "DCOS_SERVICE_ACCOUNT_CREDENTIAL": { "secret": "serviceCredential" },
@@ -61,7 +63,6 @@
     "LIBMESOS_URI": "{{resource.assets.uris.libmesos-bundle-tar-gz}}",
 
     "TASKCFG_ALL_ENABLE_CLUSTER": "{{hivemq.cluster_settings.enable_cluster}}",
-    "DCOS_PLUGIN": "{{resource.assets.uris.dcos-plugin}}",
 
     "TASKCFG_ALL_ENABLE_WEBSOCKET_LISTENER": "{{hivemq.mqtt_port_settings.enable_websocket_listener}}",
     "TASKCFG_ALL_WEBSOCKET_PORT": "{{hivemq.mqtt_port_settings.websocket_port}}",
@@ -81,7 +82,11 @@
 
     "TASKCFG_ALL_ENABLE_USAGE_STATISTICS": "{{hivemq.core_settings.enable_usage_statistics}}",
     "TASKCFG_ALL_DISCOVERY_PORT": "{{hivemq.cluster_settings.discovery_port}}",
-    "TASKCFG_ALL_LICENSE_FILE": "{{hivemq.core_settings.license_file}}"
+    "TASKCFG_ALL_LICENSE_FILE": "{{hivemq.core_settings.license_file}}",
+    "LICENSE_SECRET": "{{hivemq.core_settings.license_secret}}",
+
+    "TASKCFG_ALL_ENABLE_METRICS": "{{hivemq.mqtt_port_settings.enable_prometheus_metrics}}",
+    "TASKCFG_ALL_METRICS_PORT": "{{hivemq.mqtt_port_settings.metrics_port}}"
   },
   "uris": [
     "{{resource.assets.uris.bootstrap-zip}}",

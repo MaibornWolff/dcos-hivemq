@@ -147,6 +147,11 @@
               "description": "base64 encoded license file",
               "default": ""
             },
+            "license_secret": {
+              "type": "string",
+              "description": "secret to read license from, needs DC/OS enterprise",
+              "default": ""
+            },
             "enable_user_management": {
               "description": "Enable user management via RBAC Plugin (see readme)",
               "type": "boolean",
@@ -176,6 +181,16 @@
               "description": "Expose the websocket connection on this port",
               "type": "integer",
               "default": 8000
+            },
+            "enable_prometheus_metrics": {
+              "description": "Expose metrics endpoint",
+              "type": "boolean",
+              "default": false
+            },
+            "metrics_port": {
+              "description": "The metrics will be accessible at /metrics",
+              "type": "integer",
+              "default": 9399
             },
             "tls_websocket_port": {
               "description": "Will only take effect if TLS is enabled",

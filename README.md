@@ -1,7 +1,7 @@
 # HiveMQ for DC/OS
 
 ### Project status
-This package is a proof of concept. Since HiveMQ and DC/OS are a natural fit we wanted to explore some possibilities of a HiveMQ Framework. Do not use in production!
+This package is a proof of concept. Since HiveMQ and DC/OS are a natural fit, we wanted to explore some possibilities of a HiveMQ Framework. Do not use in production!
 
 ## Setup
 

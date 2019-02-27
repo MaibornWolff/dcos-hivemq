@@ -120,6 +120,12 @@
 
     <control-center>
         <enabled>{{ENABLE_CONTROL_CENTER}}</enabled>
+        <users>
+            <user>
+                <name>admin</name>
+                <password>{{CC_PASSWORD_HASH}}</password>
+            </user>
+        </users>
         <listeners>
             <http>
                 <port>{{CONTROL_CENTER_PORT}}</port>

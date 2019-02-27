@@ -104,6 +104,7 @@ pods:
         cpus: {{NODE_CPUS}}
         memory: {{NODE_MEM}}
         cmd: |
+          export CC_PASSWORD_HASH=$(echo -n "admin${CONTROL_CENTER_ADMIN_PASSWORD}" | sha256sum | awk '{ print $1 }')
           ./bootstrap
           export HIVEMQ_DATA_FOLDER=$MESOS_SANDBOX/hivemq-data
           mkdir -p $MESOS_SANDBOX/hivemq-data/extensions
@@ -200,7 +201,7 @@ pods:
         memory: 128
         cmd: |
           echo $USERS_FILE
-          echo $USERS_FILE > hivemq-data/extensions/credentials.xml
+          echo $USERS_FILE > hivemq-data/credentials.xml
 {{/TASKCFG_ALL_ENABLE_USERS}}
       add_plugin:
         goal: ONCE

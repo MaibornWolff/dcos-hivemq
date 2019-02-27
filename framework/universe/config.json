@@ -221,6 +221,10 @@
               "description": "Will only take effect if TLS is enabled",
               "type": "integer",
               "default": 8443
+            },
+            "control_center_admin_password": {
+              "type": "string",
+              "default": "hivemq1dcos"
             }
           }
         },

@@ -1,12 +1,12 @@
 # HiveMQ for DC/OS
 
 ### Project status
-This package is currently in alpha. Do not use in production!
+This package is a proof of concept. Since HiveMQ and DC/OS are a natural fit we wanted to explore some possibilities of a HiveMQ Framework. Do not use in production!
 
 ## Setup
 
-2. Setup minidcos as per instructions or use your existing cluster
-3. [Install dcosdev and setup an asset repository](https://github.com/mesosphere/dcosdev)
+1. Setup minidcos as per instructions or use your existing cluster
+2. [Install dcosdev and setup an asset repository](https://github.com/mesosphere/dcosdev)
 3. Run `dcosdev java build` to build the modified scheduler
 4. Run `dcosdev up` in /framework to upload the resources
 5. Install package from dcos cli or Web UI
@@ -34,12 +34,10 @@ The decommission_task will be run whenever a node has to stop or restart. The sc
 in maintenance mode. Only if the node has no connected clients any more and the cluster is still healthy, will this task
 finish and the node be killed. 
 
-Currently, HiveMQ does not provide a health endpoint, therefore the decommission_task is without effect (but runs nevertheless).
-The files status.json and test_decom.sh can be used to develop and test the communication with the future endpoint.
+Currently, HiveMQ does not provide a health or decomimission endpoint, therefore the decommission_task is without effect (but runs nevertheless). The files status.json and test_decom.sh can be used to develop and test the communication with a future endpoint.
 
 The important part of the scheduler customisation is in CustomizedDecommissionPlanFactory, where an additional 
-DeploymentStep is inserted before the task is killed. The decommission_step can therefore easily be moved behind the task killing step
-if that is the desired behaviour.
+DeploymentStep is inserted before the task is killed. The decommission_step can therefore easily be moved behind the task killing step if that is the desired behaviour.
 
 In that context please also note, that the customised scheduler will fail if the service definition svc.yml does not contain
 a decommission_task task for every node that is defined there. If you want to remove decommissioning altogether, you have
@@ -53,7 +51,7 @@ dcos package install --cli --yes hivemq
 dcos hivemq plan start add_user -p USERS_FILE="$(cat credentials.xml)"
 ```
 
-Users will not be populated to new nodes. They will start with the default configuration. When user management is enabled,
+Users will *not* be populated to new nodes. They will start with the default configuration. When user management is enabled,
 the official RBAC HiveMQ extension will be enabled and the credentials.xml file will be placed in a persistent location.
 The file will be symlinked to the extension folder, so the extension itself can be enabled or disabled, but the credentials
 file will not be removed with the extension itself.
@@ -70,7 +68,7 @@ dcos hivemq plan start add_plugin -p URL=https://url/to/extension.zip
 Note that additional configuration is not possible. If you need non-standard configurations, please modify and reupload
 the extension ZIP to a public URL.
 
-Extensions will persist during restart and redeploy, but will not be transferred to later created nodes.
+Extensions will persist during restart and redeploy, but will *not* be transferred to nodes created later.
 
 ### Control Center
 

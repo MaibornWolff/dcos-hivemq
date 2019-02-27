@@ -1,0 +1,14 @@
+{
+	"nodes": {
+		"node1": {
+				"state": "maintenance",
+				"connectedClients": 0
+		},
+		"node5": {
+				"state": "maintenance",
+				"connectedClients": 5
+		}
+	},
+	 "overall": "HEALTHY",
+	 "currentNode": "node1"
+}

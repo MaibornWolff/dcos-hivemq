@@ -3,19 +3,39 @@ scheduler:
   principal: {{FRAMEWORK_PRINCIPAL}}
   user: {{FRAMEWORK_USER}}
 pods:
-  master:
-    count: 2
+  hivemq:
+    count: {{NODE_COUNT}}
+    allow-decommission: true
     placement: '{{{NODE_PLACEMENT}}}'
     {{#ENABLE_VIRTUAL_NETWORK}}
     networks:
       {{VIRTUAL_NETWORK_NAME}}:
         labels: {{VIRTUAL_NETWORK_PLUGIN_LABELS}}
     {{/ENABLE_VIRTUAL_NETWORK}}
+    volume:
+      path: "hivemq-data"
+      type: {{NODE_DISK_TYPE}}
+      size: {{NODE_DISK}}
     uris:
       - {{HIVEMQ_URI}}
       - {{JAVA_URI}}
       - {{BOOTSTRAP_URI}}
       - {{JQ_URI}}
+      {{#TASKCFG_ALL_ENABLE_CLUSTER}}
+      - {{DCOS_URI}}
+      {{/TASKCFG_ALL_ENABLE_CLUSTER}}
+      {{#TASKCFG_ALL_ENABLE_METRICS}}
+      - {{PROMETHEUS_URI}}
+      {{/TASKCFG_ALL_ENABLE_METRICS}}
+      {{#TASKCFG_ALL_ENABLE_USERS}}
+      - {{RBAC_URI}}
+      {{/TASKCFG_ALL_ENABLE_USERS}}
+    {{#LICENSE_SECRET}}
+    secrets:
+      license:
+        secret: {{LICENSE_SECRET}}
+        env-key: LICENSE
+    {{/LICENSE_SECRET}}
     tasks:
       node:
         {{#TASKCFG_ALL_ENABLE_TLS_LISTENER}}
@@ -27,6 +47,7 @@ pods:
       {{#TASKCFG_ALL_ENABLE_CLUSTER}}
           tcp-discovery:
             port: {{TASKCFG_ALL_DISCOVERY_PORT}}
+            advertise: true
       {{/TASKCFG_ALL_ENABLE_CLUSTER}}
       {{#TASKCFG_ALL_ENABLE_WEBSOCKET_LISTENER}}
           websocket:
@@ -36,20 +57,25 @@ pods:
               prefix: ws
               port: {{TASKCFG_ALL_WEBSOCKET_PORT}}
       {{/TASKCFG_ALL_ENABLE_WEBSOCKET_LISTENER}}
-      {{#TASKCFG_MASTER_ENABLE_CONTROL_CENTER}}
+      {{#TASKCFG_ALL_ENABLE_CONTROL_CENTER}}
           control-center:
-            port: {{TASKCFG_MASTER_CONTROL_CENTER_PORT}}
+            port: {{TASKCFG_ALL_CONTROL_CENTER_PORT}}
             advertise: true
             vip:
               prefix: cc
-              port: {{TASKCFG_MASTER_CONTROL_CENTER_PORT}}
-      {{/TASKCFG_MASTER_ENABLE_CONTROL_CENTER}}
+              port: {{TASKCFG_ALL_CONTROL_CENTER_PORT}}
+      {{/TASKCFG_ALL_ENABLE_CONTROL_CENTER}}
           mqtt-tcp:
             port: {{TASKCFG_ALL_MQTT_PORT}}
             advertise: true
             vip:
               prefix: mqtt
               port: {{TASKCFG_ALL_MQTT_PORT}}
+      {{#TASKCFG_ALL_ENABLE_METRICS}}
+          metrics:
+            port: {{TASKCFG_ALL_METRICS_PORT}}
+            advertise: true
+      {{/TASKCFG_ALL_ENABLE_METRICS}}
       {{#TASKCFG_ALL_ENABLE_TLS_LISTENER}}
           mqtt-tls:
             port: {{TASKCFG_ALL_TLS_PORT}}
@@ -57,139 +83,58 @@ pods:
             vip:
               prefix: mqtt-tls
               port: {{TASKCFG_ALL_TLS_PORT}}
-      {{/TASKCFG_ALL_ENABLE_TLS_LISTENER}}
-        goal: RUNNING
-        cpus: {{NODE_CPUS}}
-        memory: {{NODE_MEM}}
-        cmd: |
-          ./bootstrap -resolve-hosts=master-0-node.$FRAMEWORK_HOST,master-1-node.$FRAMEWORK_HOST
-          export MASTER_0_IP=$(getent hosts master-0-node.$FRAMEWORK_HOST | awk '{ print $1 }')
-          export MASTER_1_IP=$(getent hosts master-1-node.$FRAMEWORK_HOST | awk '{ print $1 }')
-          export HIVEMQ_DATA_FOLDER=$MESOS_SANDBOX/hivemq-data
-          sed -i -e '41d' $MESOS_SANDBOX/hivemq-4.0.2/bin/run.sh
-          if [ ! -z "$LICENSE_FILE" ]; then
-            echo "$LICENSE_FILE" | base64 -d > $MESOS_SANDBOX/hivemq-4.0.2/license/hivemq.lic
-          fi
-
-          chmod 755 $MESOS_SANDBOX/hivemq-4.0.2/bin/run.sh
-          JAVA_HOME=$MESOS_SANDBOX/jdk-11.0.2 PATH=$MESOS_SANDBOX/jdk-11.0.2/bin/:$PATH $MESOS_SANDBOX/hivemq-4.0.2/bin/run.sh
-        configs:
-          config.xml:
-            template: config.xml.mustache
-            dest: hivemq-4.0.2/conf/config.xml
-        volume:
-          path: "hivemq-data"
-          type: {{NODE_DISK_TYPE}}
-          size: {{NODE_DISK}}
-        readiness-check:
-          cmd: |
-            pgrep -f hivemq\.jar
-          interval: 10
-          delay: 10
-          timeout: 5
-        health-check:
-          cmd: |
-            pgrep -f hivemq\.jar
-          interval: 10
-          grace-period: 20
-          delay: 20
-          timeout: 5
-          max-consecutive-failures: 10
-      decommission_task:
-        goal: FINISH
-        cpus: 0.1
-        memory: 128
-        cmd: |
-          mv ./jq-linux64 ./jq && chmod +x ./jq
-          export NODE=$(echo $TASK_NAME | sed 's/decommission_task/node/')
-          # the following lines can be enabled once HiveMQ actually opens the endpoint
-
-  #            # Wait until cluster is healthy before putting node into maintenance mode
-  #            while true
-  #            do
-  #             export STATUS=$(curl http://$NODE.$FRAMEWORK_HOST:1234/health)
-  #             echo ${STATUS} | ./jq
-  #             if $(echo "$STATUS" | ./jq -e '.overall == "HEALTHY"') ; then
-  #                echo "Cluster is healthy"
-  #                break
-  #             else
-  #                echo "Cluster is NOT healthy"
-  #                sleep 5
-  #             fi
-  #            done
-  #            # put node into maintenance mode
-  #            curl -H "Content-Type: application/json" -d '{"state": "maintenance","disconnectInterval": "40s","disconnectBatch": "30"}' http://$NODE.$FRAMEWORK_HOST:1234/state
-  #            # Wait until all clients are disconnected and the cluster is healthy
-  #            while true
-  #            do
-  #             export STATUS=$(curl http://$NODE.$FRAMEWORK_HOST:1234/health)
-  #             echo ${STATUS} | ./jq
-  #             export THIS_NODE=$(echo "$STATUS" | ./jq .currentNode)
-  #             if $(echo "$STATUS" | ./jq -e '.overall == "HEALTHY"') &&  $(echo "$STATUS" | ./jq -e ".nodes.$THIS_NODE.connectedClients == 0") ; then
-  #                echo "Cluster is healthy and all clients disconnected"
-  #                break
-  #             else
-  #                echo "Cluster not healthy or clients still connected"
-  #                sleep 5
-  #             fi
-  #            done
-  slave:
-    count: {{NODE_COUNT}}
-    allow-decommission: true
-    placement: '{{{NODE_PLACEMENT}}}'
-    {{#ENABLE_VIRTUAL_NETWORK}}
-    networks:
-      {{VIRTUAL_NETWORK_NAME}}:
-        labels: {{VIRTUAL_NETWORK_PLUGIN_LABELS}}
-    {{/ENABLE_VIRTUAL_NETWORK}}
-    uris:
-      - {{HIVEMQ_URI}}
-      - {{JAVA_URI}}
-      - {{BOOTSTRAP_URI}}
-      - {{JQ_URI}}
-    tasks:
-      node:
-        {{#TASKCFG_ALL_ENABLE_TLS_LISTENER}}
-        transport-encryption:
-          - name: node
-            type: KEYSTORE
-        {{/TASKCFG_ALL_ENABLE_TLS_LISTENER}}
-        goal: RUNNING
-        cpus: {{NODE_CPUS}}
-        memory: {{NODE_MEM}}
-        ports:
-          mqtt-tcp:
-            port: {{TASKCFG_ALL_MQTT_PORT}}
-            vip:
-              prefix: mqtt
-              port: {{TASKCFG_ALL_MQTT_PORT}}
-          {{#TASKCFG_ALL_ENABLE_TLS_LISTENER}}
-          mqtt-tls:
-            port: {{TASKCFG_ALL_TLS_PORT}}
-            vip:
-              prefix: mqtt-tls
-              port: {{TASKCFG_ALL_TLS_PORT}}
-          {{/TASKCFG_ALL_ENABLE_TLS_LISTENER}}
-          {{#TASKCFG_ALL_ENABLE_CLUSTER}}
-          tcp-discovery:
-            port: {{TASKCFG_ALL_DISCOVERY_PORT}}
-          {{/TASKCFG_ALL_ENABLE_CLUSTER}}
           {{#TASKCFG_ALL_ENABLE_WEBSOCKET_LISTENER}}
-          websocket:
-            port: {{TASKCFG_ALL_WEBSOCKET_PORT}}
+          websocket-tls:
+            port: {{TASKCFG_ALL_TLS_WEBSOCKET_PORT}}
+            advertise: true
             vip:
-              prefix: ws
-              port: {{TASKCFG_ALL_WEBSOCKET_PORT}}
+              prefix: websocket-tls
+              port: {{TASKCFG_ALL_TLS_WEBSOCKET_PORT}}
           {{/TASKCFG_ALL_ENABLE_WEBSOCKET_LISTENER}}
+          {{#TASKCFG_ALL_ENABLE_CONTROL_CENTER}}
+          control-center-tls:
+            port: {{TASKCFG_ALL_CONTROL_CENTER_TLS_PORT}}
+            advertise: true
+            vip:
+              prefix: cc-tls
+              port: {{TASKCFG_ALL_CONTROL_CENTER_TLS_PORT}}
+          {{/TASKCFG_ALL_ENABLE_CONTROL_CENTER}}
+     {{/TASKCFG_ALL_ENABLE_TLS_LISTENER}}
+        goal: RUNNING
+        cpus: {{NODE_CPUS}}
+        memory: {{NODE_MEM}}
         cmd: |
-          ./bootstrap -resolve-hosts=master-0-node.$FRAMEWORK_HOST,master-1-node.$FRAMEWORK_HOST
-          export MASTER_0_IP=$(getent hosts master-0-node.$FRAMEWORK_HOST | awk '{ print $1 }')
-          export MASTER_1_IP=$(getent hosts master-1-node.$FRAMEWORK_HOST | awk '{ print $1 }')
+          export CC_PASSWORD_HASH=$(echo -n "admin${CONTROL_CENTER_ADMIN_PASSWORD}" | sha256sum | awk '{ print $1 }')
+          ./bootstrap
           export HIVEMQ_DATA_FOLDER=$MESOS_SANDBOX/hivemq-data
+          mkdir -p $MESOS_SANDBOX/hivemq-data/extensions
+          rm -rf $MESOS_SANDBOX/hivemq-4.0.2/extensions
+          ln -s $MESOS_SANDBOX/hivemq-data/extensions $MESOS_SANDBOX/hivemq-4.0.2
           sed -i -e '41d' $MESOS_SANDBOX/hivemq-4.0.2/bin/run.sh
           if [ ! -z "$LICENSE_FILE" ]; then
             echo "$LICENSE_FILE" | base64 -d > $MESOS_SANDBOX/hivemq-4.0.2/license/hivemq.lic
           fi
+          if [ ! -z "$LICENSE" ]; then
+            echo "$LICENSE"  > $MESOS_SANDBOX/hivemq-4.0.2/license/hivemq.lic
+          fi
+
+{{#TASKCFG_ALL_ENABLE_CLUSTER}}
+          mv hivemq-dcos-cluster-discovery-extension hivemq-data/extensions/ 2>/dev/null # this will fail if node is restarted
+{{/TASKCFG_ALL_ENABLE_CLUSTER}}
+          rm -rf hivemq-data/extensions/hivemq-prometheus-extension
+{{#TASKCFG_ALL_ENABLE_METRICS}}
+          mv hivemq-prometheus-extension hivemq-data/extensions/
+          sed -it "s/9399/$METRICS_PORT/g" hivemq-data/extensions/hivemq-prometheus-extension/prometheusConfiguration.properties
+{{/TASKCFG_ALL_ENABLE_METRICS}}
+          rm -rf hivemq-data/extensions/hivemq-file-rbac-extension
+{{#TASKCFG_ALL_ENABLE_USERS}}
+          if [ "$HASH_USER_PASSWORDS" = true ]; then
+            sed -i "s/PLAIN/HASHED/g" hivemq-file-rbac-extension/extension-config.xml
+          fi
+          mv hivemq-file-rbac-extension/credentials.xml hivemq-data/credentials.xml 2>/dev/null # if node is restarted, credentials wont be overwritten
+          mv hivemq-file-rbac-extension hivemq-data/extensions/
+          ln -s $MESOS_SANDBOX/hivemq-data/credentials.xml $MESOS_SANDBOX/hivemq-data/extensions/hivemq-file-rbac-extension/credentials.xml
+{{/TASKCFG_ALL_ENABLE_USERS}}
 
           chmod 755 $MESOS_SANDBOX/hivemq-4.0.2/bin/run.sh
           JAVA_HOME=$MESOS_SANDBOX/jdk-11.0.2 PATH=$MESOS_SANDBOX/jdk-11.0.2/bin/:$PATH $MESOS_SANDBOX/hivemq-4.0.2/bin/run.sh
@@ -197,10 +142,6 @@ pods:
           config.xml:
             template: config.xml.mustache
             dest: hivemq-4.0.2/conf/config.xml
-        volume:
-          path: "hivemq-data"
-          type: {{NODE_DISK_TYPE}}
-          size: {{NODE_DISK}}
         readiness-check:
           cmd: |
             pgrep -f hivemq\.jar
@@ -222,7 +163,7 @@ pods:
         cmd: |
             mv ./jq-linux64 ./jq && chmod +x ./jq
             export NODE=$(echo $TASK_NAME | sed 's/decommission_task/node/')
-# the following lines can be enabled once HiveMQ actually opens the endpoint
+# the following lines can be enabled once HiveMQ opens endpoints for health and maintenance mode
 
 #            # Wait until cluster is healthy before putting node into maintenance mode
 #            while true
@@ -253,30 +194,55 @@ pods:
 #                sleep 5
 #             fi
 #            done
+{{#TASKCFG_ALL_ENABLE_USERS}}
+      add_user:
+        goal: ONCE
+        cpus: 0.1
+        memory: 128
+        cmd: |
+          echo $USERS_FILE
+          echo $USERS_FILE > hivemq-data/credentials.xml
+{{/TASKCFG_ALL_ENABLE_USERS}}
+      add_plugin:
+        goal: ONCE
+        cpus: 0.1
+        memory: 128
+        cmd: |
+          echo "Downloading zip from $URL"
+          curl $URL -o extension.zip
+          unzip extension.zip -d hivemq-data/extensions/
 plans:
   deploy:
     strategy: serial
     phases:
-      master-parallel-phase:
-        strategy: parallel
-        pod: master
-        steps:
-          - default: [[node]]
-      slave-serial-phase:
+      serial-phase:
         strategy: serial
-        pod: slave
+        pod: hivemq
         steps:
           - default: [[node]]
   update:
     strategy: serial
     phases:
-      master-parallel-phase:
+      serial-phase:
         strategy: serial
-        pod: master
+        pod: hivemq
         steps:
           - default: [[decommission_task], [node]]
-      slave-serial-phase:
-        strategy: serial
-        pod: slave
+{{#TASKCFG_ALL_ENABLE_USERS}}
+  add_user:
+    strategy: parallel
+    phases:
+      parallel-phase:
+        strategy: parallel
+        pod: hivemq
         steps:
-          - default: [[decommission_task], [node]]
+          - default: [[add_user]]
+{{/TASKCFG_ALL_ENABLE_USERS}}
+  add_plugin:
+    strategy: parallel
+    phases:
+      parallel-phase:
+        strategy: parallel
+        pod: hivemq
+        steps:
+          - default: [[add_plugin]]

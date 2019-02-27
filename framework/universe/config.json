@@ -69,12 +69,12 @@
       "description": "hivemq pod configuration properties",
       "type": "object",
       "properties": {
-        "slave_count": {
-          "title": "Slave Node Count",
-          "description": "There will always be two additional master nodes",
+        "count": {
+          "title": "Node Count",
+          "description": "The number of nodes to be created",
           "type": "integer",
-          "default": 1,
-          "minimum": 0
+          "default": 3,
+          "minimum": 1
         },
         "placement_constraint": {
           "title": "Placement constraint",
@@ -114,7 +114,7 @@
         }
       },
       "required": [
-        "slave_count",
+        "count",
         "cpus",
         "mem",
         "disk",
@@ -122,73 +122,126 @@
       ]
 	},
     "hivemq": {
-      "description": "HiveMQ pod configuration properties",
       "type": "object",
       "properties": {
-        "enable_websocket_listener": {
-          "description": "Expose a websocket connection",
-          "type": "boolean",
-          "default": false
+        "core_settings": {
+          "type": "object",
+          "properties": {
+            "allow_wildcard_subscriptions": {
+              "description": "Allow Wildcard Subscriptions",
+              "type": "boolean",
+              "default": false
+            },
+            "allow_shared_subscriptions": {
+              "description": "Allow shared subscriptions",
+              "type": "boolean",
+              "default": false
+            },
+            "enable_usage_statistics": {
+              "description": "Forward anonymous usage statistics to HiveMQ developers",
+              "type": "boolean",
+              "default": false
+            },
+            "license_file": {
+              "type": "string",
+              "description": "base64 encoded license file",
+              "default": ""
+            },
+            "license_secret": {
+              "type": "string",
+              "description": "secret to read license from, needs DC/OS enterprise",
+              "default": ""
+            },
+            "enable_user_management": {
+              "description": "Enable user management via RBAC Plugin (see readme)",
+              "type": "boolean",
+              "default": false
+            },
+            "use_hashed_passwords": {
+              "description": "Use hashed or plaintext passwords, see readme for setting users and passwords",
+              "type": "boolean",
+              "default": false
+            }
+          }
         },
-        "websocket_port": {
-          "description": "Expose the websocket connection on this port",
-          "type": "integer",
-          "default": 8000
+        "mqtt_port_settings": {
+          "type": "object",
+          "properties": {
+            "mqtt_port": {
+              "description": "Outside port to use for communication with cluster",
+              "type": "integer",
+              "default": 1883
+            },
+            "enable_websocket_listener": {
+              "description": "Expose a websocket connection",
+              "type": "boolean",
+              "default": false
+            },
+            "websocket_port": {
+              "description": "Expose the websocket connection on this port",
+              "type": "integer",
+              "default": 8000
+            },
+            "enable_prometheus_metrics": {
+              "description": "Expose metrics endpoint",
+              "type": "boolean",
+              "default": false
+            },
+            "metrics_port": {
+              "description": "The metrics will be accessible at /metrics",
+              "type": "integer",
+              "default": 9399
+            },
+            "tls_websocket_port": {
+              "description": "Will only take effect if TLS is enabled",
+              "type": "integer",
+              "default": 8001
+            },
+            "enable_tls": {
+              "description": "Use transport encryption. See readme for requirements!",
+              "type": "boolean",
+              "default": false
+            },
+            "tls_port": {
+              "description": "Port for TLS connections",
+              "type": "integer",
+              "default": 8883
+            },
+            "enable_control_center": {
+              "description": "Enable control center",
+              "type": "boolean",
+              "default": false
+            },
+            "control_center_port": {
+              "description": "Port to expose the control center",
+              "type": "integer",
+              "default": 8080
+            },
+            "control_center_tls_port": {
+              "description": "Will only take effect if TLS is enabled",
+              "type": "integer",
+              "default": 8443
+            },
+            "control_center_admin_password": {
+              "type": "string",
+              "default": "hivemq1dcos"
+            }
+          }
         },
-        "enable_tls_listener": {
-          "description": "Use transport encryption. You have to provide a keystore and a truststore",
-          "type": "boolean",
-          "default": false
-        },
-        "tls_port": {
-          "description": "Port for TLS connections",
-          "type": "integer",
-          "default": 8883
-        },
-        "allow_wildcard_subscriptions": {
-          "description": "Allow Wildcard Subscriptions",
-          "type": "boolean",
-          "default": false
-        },
-        "allow_shared_subscriptions": {
-          "description": "Allow shared subscriptions",
-          "type": "boolean",
-          "default": false
-        },
-        "enable_cluster": {
-          "description": "Enable cluster support",
-          "type": "boolean",
-          "default": true
-        },
-        "discovery_port": {
-          "description": "Port to use for node discovery within the cluster",
-          "type": "integer",
-          "default": 7800
-        },
-        "mqtt_port": {
-          "description": "Port to use for communication with cluster",
-          "type": "integer",
-          "default": 1883
-        },
-        "enable_control_center": {
-          "description": "Enable control center",
-          "type": "boolean",
-          "default": false
-        },
-        "control_center_port": {
-          "description": "Port to expose the control center",
-          "type": "integer",
-          "default": 8080
-        },
-        "enable_usage_statistics": {
-          "description": "Forward anonymous usage statistics to HiveMQ developers",
-          "type": "boolean",
-          "default": false
-        },
-        "license_file": {
-          "type": "string",
-          "description": "base64 encoded license file",
-          "default": ""
+        "cluster_settings": {
+          "type": "object",
+          "properties": {
+            "enable_cluster": {
+              "description": "Enable cluster support",
+              "type": "boolean",
+              "default": true
+            },
+            "discovery_port": {
+              "description": "Port to use for node discovery within the cluster",
+              "type": "integer",
+              "default": 7800
+            }
+          }
         }
       }
     }

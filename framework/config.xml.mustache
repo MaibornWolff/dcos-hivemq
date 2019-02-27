@@ -35,10 +35,9 @@
                 <client-authentication-mode>NONE</client-authentication-mode>
             </tls>
         </tls-tcp-listener>
-        {{/ENABLE_TLS_LISTENER}}
-        {{#ENABLE_TLS_WEBSOCKET_LISTENER}}
+            {{#ENABLE_WEBSOCKET_LISTENER}}
         <tls-websocket-listener>
-            <port>8001</port>
+            <port>{{TLS_WEBSOCKET_PORT}}</port>
             <bind-address>0.0.0.0</bind-address>
             <path>/mqtt</path>
             <allow-extensions>false</allow-extensions>
@@ -59,7 +58,8 @@
                 <client-authentication-mode>NONE</client-authentication-mode>
             </tls>
         </tls-websocket-listener>
-        {{/ENABLE_TLS_WEBSOCKET_LISTENER}}
+            {{/ENABLE_WEBSOCKET_LISTENER}}
+        {{/ENABLE_TLS_LISTENER}}
     </listeners>
 
     <cluster>
@@ -72,23 +72,7 @@
             </tcp>
         </transport>
         <discovery>
-            <static>
-                <node>
-                    <!-- replace this IP with the IP address of your interface -->
-                    <host>{{MESOS_CONTAINER_IP}}</host>
-                    <port>{{DISCOVERY_PORT}}</port>
-                </node>
-                <node>
-                    <!-- this IP will be replaced by the IP of the primary master during startup -->
-                    <host>${MASTER_0_IP}</host>
-                    <port>{{DISCOVERY_PORT}}</port>
-                </node>
-                <node>
-                    <!-- this IP will be replaced by the IP of the secondary master during startup -->
-                    <host>${MASTER_1_IP}</host>
-                    <port>{{DISCOVERY_PORT}}</port>
-                </node>
-            </static>
+            <extension/>
         </discovery>
     </cluster>
 
@@ -136,6 +120,12 @@
 
     <control-center>
         <enabled>{{ENABLE_CONTROL_CENTER}}</enabled>
+        <users>
+            <user>
+                <name>admin</name>
+                <password>{{CC_PASSWORD_HASH}}</password>
+            </user>
+        </users>
         <listeners>
             <http>
                 <port>{{CONTROL_CENTER_PORT}}</port>
@@ -143,7 +133,7 @@
             </http>
             {{#ENABLE_TLS_LISTENER}}
             <https>
-                <port>8443</port>
+                <port>{{CONTROL_CENTER_TLS_PORT}}</port>
                 <bind-address>0.0.0.0</bind-address>
                 <tls>
                     <keystore>

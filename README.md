@@ -1,3 +1,6 @@
+# END OF LIFE
+This project is not being maintained anymore.
+
 # HiveMQ for DC/OS
 
 ### Project status
